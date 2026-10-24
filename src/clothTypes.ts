@@ -1,0 +1,41 @@
+export const CLOTH_TYPES = [
+  'T-shirt',
+  'Long T-shirt',
+  'Shirt',
+  'Sweater',
+  'Hoodie',
+  'Jacket',
+  'Coat',
+  'Short pants',
+  'Long pants',
+  'Skirt',
+  'One-piece',
+  'Socks',
+  'Underwear',
+  'Hat',
+  'Bag',
+  'Shoes',
+  'Other',
+];
+
+const ICONS: Record<string, string> = {
+  'T-shirt': '👕',
+  'Long T-shirt': '👚',
+  Shirt: '👔',
+  Sweater: '🧶',
+  Hoodie: '🧥',
+  Jacket: '🧥',
+  Coat: '🥼',
+  'Short pants': '🩳',
+  'Long pants': '👖',
+  Skirt: '👗',
+  'One-piece': '👗',
+  Socks: '🧦',
+  Underwear: '🩲',
+  Hat: '🧢',
+  Bag: '👜',
+  Shoes: '👟',
+  Other: '🏷️',
+};
+
+export const typeIcon = (type: string): string => ICONS[type] ?? '🏷️';
