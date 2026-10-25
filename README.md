@@ -8,9 +8,10 @@ This application is developed with React, TypeScript, Vite, MUI, and SQLite ([sq
 
 A user can
 
-1. register, edit, and delete cloth items
-1. sort the items by any column
-1. analyze stats (item count, total/average cost, breakdowns by brand, category, type, and color)
+1. register, edit, and delete cloth items, or add many at once from an order history page with [your AI](#add-by-your-ai)
+1. browse the items as compact cards (default) or as a table, sorted by any column
+1. filter the items by free-text search, category, color, and brand
+1. analyze stats (item count, total/average cost, a stacked bar chart of colors by category, and breakdowns by brand, category, type, and color)
 1. switch between light and dark mode (follows the system setting by default)
 1. switch the display language between English and Japanese (follows the browser language by default; type, category, and color names are translated for display only, the stored data stays language independent)
 1. keep the data in a `.sqlite` file, or export/import it
@@ -28,7 +29,7 @@ A user can
 - image (optional)
 - url (optional, e.g. a product page)
 
-The types, categories, and colors are defined in `src/clothTypes.ts` and `src/colors.ts`.
+The types, categories, and colors are defined in `src/clothTypes.ts` and `src/colors.ts`; their Japanese names are in `src/i18n.tsx`.
 
 ## Getting started
 
@@ -37,6 +38,19 @@ npm install
 npm run dev     # start the dev server
 npm run build   # type-check and build to dist/
 ```
+
+## Add by your AI
+
+Registering many items by hand is tedious, so Tansoo can use an AI model of your choice (e.g. Gemini, GPT) to read your order history. Tansoo itself never talks to an AI; you copy and paste between the two.
+
+1. Click the "Add by your AI" button.
+1. Tansoo shows a text prompt. Copy it.
+1. Open an order history page (e.g. UNIQLO or GU) and give it to your AI model together with the prompt.
+1. The AI reads the page and replies with the purchased items as a JSON list.
+1. Copy the reply and paste it into the text field in Tansoo, then click "Check".
+1. Tansoo parses the reply and shows a preview with any warnings (for example an unknown color). Click "Add" to register the items.
+
+The prompt is written in the current display language and asks for English type and color names; the pasted reply may use either the English or the Japanese names. Photos are not imported. It has been tried with Gemini on the UNIQLO and GU order pages.
 
 ## Where the data is stored
 
@@ -48,19 +62,10 @@ The data is a SQLite database that lives in your browser.
 
 Export a file now and then as a backup.
 
+## Deployment
+
+The app is a static site. The workflow in `.github/workflows/deploy.yml` builds it and deploys it to GitHub Pages on every push to `main`. To enable it, set Settings → Pages → Source to "GitHub Actions" in the repository. The site is served from `https://<user>.github.io/<repo>/`; the workflow passes that sub path to Vite through the `VITE_BASE` environment variable. Data is stored in each visitor's own browser, so a deployed site starts empty.
+
 ## Credits
 
 Cloth icons are from [FontBotamochi](https://github.com/botamochi6277/FontBotamochi).
-
-## Add by your AI button
-
-1. user click "Add by your AI" button
-1. tansoo show text prompt to send user AI model (e.g. GEMINI, GPT)
-1. user copy the prompt
-   1, user a open order history page (e.g. UNIQLO page)
-1. user run his/her AI model
-1. user send the prompt to the AI model
-1. the AI model parse the page and show list of purchased items as text output
-1. user copy the list
-1. user paste the list on text field in tansoo
-1. tansoo parse the pasted text and add items

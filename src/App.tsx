@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  AppBar, Box, Button, Chip, Container, CssBaseline, IconButton, Stack, Tab, Tabs, ThemeProvider, Toolbar, Typography,
+  AppBar, Box, Button, Chip, Container, CssBaseline, IconButton, Link, Stack, Tab, Tabs, ThemeProvider, Toolbar, Typography,
   createTheme, useMediaQuery,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -11,6 +11,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import GitHubIcon from '@mui/icons-material/GitHub';
 import TranslateIcon from '@mui/icons-material/Translate';
 import * as db from './db';
 import { useI18n } from './i18n';
@@ -20,6 +21,8 @@ import ItemForm from './components/ItemForm';
 import AiImportDialog from './components/AiImportDialog';
 import ItemList from './components/ItemList';
 import Stats from './components/Stats';
+
+const REPO_URL = 'https://github.com/botamochi6277/tansoo';
 
 const MODE_KEY = 'smart-closet-mode';
 type Mode = 'light' | 'dark';
@@ -221,6 +224,7 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline enableColorScheme />
+      <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <AppBar position="static">
         <Toolbar>
           <Box component="img" src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" sx={{ height: 34, mr: 1 }} />
@@ -271,7 +275,7 @@ export default function App() {
           </IconButton>
         </Toolbar>
       </AppBar>
-      <Container sx={{ py: 3 }}>
+      <Container sx={{ py: 3, flex: 1 }}>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
           <Tab label={t('tab.items')} />
           <Tab label={t('tab.stats')} />
@@ -306,6 +310,20 @@ export default function App() {
           <Stats items={items} />
         )}
       </Container>
+      <Box component="footer" sx={{ py: 2, textAlign: 'center', borderTop: 1, borderColor: 'divider' }}>
+        <Link
+          href={REPO_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          color="text.secondary"
+          underline="hover"
+          sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}
+        >
+          <GitHubIcon fontSize="small" />
+          {t('footer.github')}
+        </Link>
+      </Box>
+      </Box>
       <AiImportDialog open={aiOpen} onClose={() => setAiOpen(false)} onAdd={addMany} />
       <ItemForm
         open={formOpen}
