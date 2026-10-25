@@ -1,4 +1,5 @@
 import { Box, Card, CardContent, LinearProgress, Stack, Typography } from '@mui/material';
+import ColorByCategory from './ColorByCategory';
 import { categoryOf } from '../clothTypes';
 import type { ClothItem } from '../types';
 
@@ -51,6 +52,7 @@ export default function Stats({ items }: { items: ClothItem[] }) {
           <Typography variant="h4">¥{Math.round(total / items.length).toLocaleString()}</Typography>
         </CardContent></Card>
       </Stack>
+      <ColorByCategory items={items} />
       <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: "wrap" }}>
         <Breakdown title="By brand" rows={groupBy(items, 'brand')} total={items.length} />
         <Breakdown title="By category" rows={groupBy(items, 'category')} total={items.length} />

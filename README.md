@@ -50,3 +50,16 @@ Export a file now and then as a backup.
 ## Credits
 
 Cloth icons are from [FontBotamochi](https://github.com/botamochi6277/FontBotamochi).
+
+## Add by your AI button
+
+1. user click "Add by your AI" button
+1. tansoo show text prompt to send user AI model (e.g. GEMINI, GPT)
+1. user copy the prompt
+   1, user a open order history page (e.g. UNIQLO page)
+1. user run his/her AI model
+1. user send the prompt to the AI model
+1. the AI model parse the page and show list of purchased items as text output
+1. user copy the list
+1. user paste the list on text field in tansoo
+1. tansoo parse the pasted text and add items

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  AppBar, Box, Button, Chip, Container, CssBaseline, IconButton, Tab, Tabs, ThemeProvider, Toolbar, Typography,
+  AppBar, Box, Button, Chip, Container, CssBaseline, IconButton, Stack, Tab, Tabs, ThemeProvider, Toolbar, Typography,
   createTheme, useMediaQuery,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -14,6 +15,7 @@ import * as db from './db';
 import * as fs from './fileStore';
 import type { ClothItem, NewClothItem } from './types';
 import ItemForm from './components/ItemForm';
+import AiImportDialog from './components/AiImportDialog';
 import ItemList from './components/ItemList';
 import Stats from './components/Stats';
 
@@ -49,6 +51,7 @@ export default function App() {
   const [items, setItems] = useState<ClothItem[]>([]);
   const [tab, setTab] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
   const [editing, setEditing] = useState<ClothItem | null>(null);
 
   const refresh = useCallback(() => setItems(db.listItems()), []);
@@ -180,6 +183,11 @@ export default function App() {
     setFormOpen(false);
   };
 
+  const addMany = (list: NewClothItem[]) => {
+    list.forEach(db.addItem);
+    refresh();
+  };
+
   const remove = (item: ClothItem) => {
     if (!window.confirm(`Delete "${item.name}"?`)) return;
     db.deleteItem(item.id);
@@ -265,22 +273,33 @@ export default function App() {
           <Box>Loading…</Box>
         ) : tab === 0 ? (
           <>
-            <Button
-              fullWidth
-              variant="contained"
-              size="large"
-              startIcon={<AddIcon />}
-              onClick={() => { setEditing(null); setFormOpen(true); }}
-              sx={{ mb: 2 }}
-            >
-              Add new item
-            </Button>
+            <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+              <Button
+                fullWidth
+                variant="contained"
+                size="large"
+                startIcon={<AddIcon />}
+                onClick={() => { setEditing(null); setFormOpen(true); }}
+              >
+                Add new item
+              </Button>
+              <Button
+                fullWidth
+                variant="outlined"
+                size="large"
+                startIcon={<AutoAwesomeIcon />}
+                onClick={() => setAiOpen(true)}
+              >
+                Add by your AI
+              </Button>
+            </Stack>
             <ItemList items={items} onEdit={(i) => { setEditing(i); setFormOpen(true); }} onDelete={remove} />
           </>
         ) : (
           <Stats items={items} />
         )}
       </Container>
+      <AiImportDialog open={aiOpen} onClose={() => setAiOpen(false)} onAdd={addMany} />
       <ItemForm
         open={formOpen}
         initial={editing}
