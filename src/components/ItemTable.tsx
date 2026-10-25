@@ -15,16 +15,20 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { categoryOf } from '../clothTypes';
 import TypeIcon from './TypeIcon';
 import { inkFor, swatchFor } from '../colors';
 import type { ClothItem } from '../types';
 
-type SortKey = Exclude<keyof ClothItem, 'id'>;
+type SortKey = Exclude<keyof ClothItem, 'id'> | 'category';
+
+const valueOf = (it: ClothItem, k: SortKey) => (k === 'category' ? categoryOf(it.type) : it[k]);
 
 const columns: { key: SortKey; label: string; numeric?: boolean }[] = [
   { key: 'name', label: 'Name' },
   { key: 'purchasedDate', label: 'Purchased' },
   { key: 'brand', label: 'Brand' },
+  { key: 'category', label: 'Category' },
   { key: 'type', label: 'Type' },
   { key: 'color', label: 'Color' },
   { key: 'size', label: 'Size' },
@@ -44,8 +48,8 @@ export default function ItemTable({ items, onEdit, onDelete }: Props) {
   const sorted = useMemo(() => {
     const sign = dir === 'asc' ? 1 : -1;
     return [...items].sort((a, b) => {
-      const x = a[sortKey];
-      const y = b[sortKey];
+      const x = valueOf(a, sortKey);
+      const y = valueOf(b, sortKey);
       return (typeof x === 'number' ? x - (y as number) : String(x).localeCompare(String(y))) * sign;
     });
   }, [items, sortKey, dir]);
@@ -102,6 +106,7 @@ export default function ItemTable({ items, onEdit, onDelete }: Props) {
               </TableCell>
               <TableCell>{it.purchasedDate}</TableCell>
               <TableCell>{it.brand}</TableCell>
+              <TableCell>{categoryOf(it.type)}</TableCell>
               <TableCell>{it.type && <><TypeIcon type={it.type} /> {it.type}</>}</TableCell>
               <TableCell>
                 {swatchFor(it.color) && (
@@ -122,7 +127,7 @@ export default function ItemTable({ items, onEdit, onDelete }: Props) {
           ))}
           {sorted.length === 0 && (
             <TableRow>
-              <TableCell colSpan={9} align="center">No items yet. Add your first cloth item.</TableCell>
+              <TableCell colSpan={10} align="center">No items yet. Add your first cloth item.</TableCell>
             </TableRow>
           )}
         </TableBody>

@@ -1,22 +1,18 @@
-export const CLOTH_TYPES = [
-  'T-shirt',
-  'Long T-shirt',
-  'Shirt',
-  'Sweater',
-  'Hoodie',
-  'Jacket',
-  'Coat',
-  'Short pants',
-  'Long pants',
-  'Skirt',
-  'One-piece',
-  'Socks',
-  'Underwear',
-  'Hat',
-  'Bag',
-  'Shoes',
-  'Other',
+/** Category is derived from the type, never stored. */
+export const CATEGORIES: { name: string; types: string[] }[] = [
+  { name: 'Outerwear', types: ['Jacket', 'Coat', 'Hoodie'] },
+  { name: 'Tops', types: ['T-shirt', 'Long T-shirt', 'Shirt', 'Sweater'] },
+  { name: 'Bottoms', types: ['Short pants', 'Long pants', 'Skirt'] },
+  { name: 'Innerwear', types: ['Underwear', 'Socks'] },
+  { name: 'Accessories', types: ['Hat', 'Bag', 'Shoes'] },
+  { name: 'Other', types: ['One-piece', 'Other'] },
 ];
+
+export const CLOTH_TYPES = CATEGORIES.flatMap((c) => c.types);
+
+/** Category of a type; unknown (e.g. old free-text) types fall under "Other". */
+export const categoryOf = (type: string): string =>
+  CATEGORIES.find((c) => c.types.includes(type))?.name ?? 'Other';
 
 // FontBotamochi class names; types without a dedicated glyph use the hanger.
 const ICONS: Record<string, string> = {

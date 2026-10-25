@@ -1,10 +1,11 @@
 import { Box, Card, CardContent, LinearProgress, Stack, Typography } from '@mui/material';
+import { categoryOf } from '../clothTypes';
 import type { ClothItem } from '../types';
 
-function groupBy(items: ClothItem[], key: 'brand' | 'type' | 'color') {
+function groupBy(items: ClothItem[], key: 'brand' | 'type' | 'color' | 'category') {
   const m = new Map<string, { count: number; cost: number }>();
   for (const it of items) {
-    const k = it[key].trim() || '(none)';
+    const k = (key === 'category' ? categoryOf(it.type) : it[key].trim()) || '(none)';
     const g = m.get(k) ?? { count: 0, cost: 0 };
     g.count++;
     g.cost += it.cost;
@@ -52,6 +53,7 @@ export default function Stats({ items }: { items: ClothItem[] }) {
       </Stack>
       <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: "wrap" }}>
         <Breakdown title="By brand" rows={groupBy(items, 'brand')} total={items.length} />
+        <Breakdown title="By category" rows={groupBy(items, 'category')} total={items.length} />
         <Breakdown title="By type" rows={groupBy(items, 'type')} total={items.length} />
         <Breakdown title="By color" rows={groupBy(items, 'color')} total={items.length} />
       </Stack>

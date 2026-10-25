@@ -17,7 +17,7 @@ import {
   Typography,
 } from '@mui/material';
 import { fileToThumbnail } from '../image';
-import { CLOTH_TYPES } from '../clothTypes';
+import { CATEGORIES, CLOTH_TYPES } from '../clothTypes';
 import TypeIcon from './TypeIcon';
 import { COLORS } from '../colors';
 import type { ClothItem, NewClothItem } from '../types';
@@ -51,8 +51,8 @@ export default function ItemForm({ open, initial, brands, onClose, onSubmit }: P
     if (open) setForm(initial ? { ...initial } : empty());
   }, [open, initial]);
 
-  // keep a previously saved free-text type selectable when editing
-  const typeOptions = form.type && !CLOTH_TYPES.includes(form.type) ? [...CLOTH_TYPES, form.type] : CLOTH_TYPES;
+  // keep a previously saved free-text type selectable (under Other) when editing
+  const legacyType = form.type && !CLOTH_TYPES.includes(form.type) ? form.type : null;
 
   const set = <K extends keyof NewClothItem>(k: K, v: NewClothItem[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -76,10 +76,20 @@ export default function ItemForm({ open, initial, brands, onClose, onSubmit }: P
           <datalist id="brands">{brands.map((b) => <option key={b} value={b} />)}</datalist>
           <FormControl>
             <FormLabel>Type</FormLabel>
-            <RadioGroup row value={form.type} onChange={(e) => set('type', e.target.value)}>
-              {typeOptions.map((t) => (
-                <FormControlLabel key={t} value={t} control={<Radio size="small" />} label={<><TypeIcon type={t} /> {t}</>} sx={{ width: '48%', mr: 0 }} />
-              ))}
+            <RadioGroup value={form.type} onChange={(e) => set('type', e.target.value)}>
+              {CATEGORIES.map((cat) => {
+                const types = cat.name === 'Other' && legacyType ? [...cat.types, legacyType] : cat.types;
+                return (
+                  <Box key={cat.name} sx={{ mb: 1 }}>
+                    <Typography variant="caption" color="text.secondary">{cat.name}</Typography>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)' }}>
+                      {types.map((t) => (
+                        <FormControlLabel key={t} value={t} control={<Radio size="small" />} label={<><TypeIcon type={t} /> {t}</>} sx={{ mr: 0 }} />
+                      ))}
+                    </Box>
+                  </Box>
+                );
+              })}
             </RadioGroup>
           </FormControl>
           <Box>
