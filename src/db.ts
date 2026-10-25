@@ -76,12 +76,21 @@ export function importDb(bytes: Uint8Array): void {
   persist();
 }
 
+let onPersist: ((bytes: Uint8Array) => void) | null = null;
+
+/** Called with the database bytes after every change (used to mirror to a file). */
+export function setPersistListener(f: ((bytes: Uint8Array) => void) | null): void {
+  onPersist = f;
+}
+
 function persist(): void {
+  const bytes = db.export();
   try {
-    localStorage.setItem(STORAGE_KEY, toBase64(db.export()));
+    localStorage.setItem(STORAGE_KEY, toBase64(bytes));
   } catch {
     /* storage unavailable or full */
   }
+  onPersist?.(bytes);
 }
 
 export function listItems(): ClothItem[] {
