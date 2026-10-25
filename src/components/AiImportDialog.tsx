@@ -15,6 +15,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { buildPrompt, parseAiReply, type ParseResult } from '../aiImport';
 import type { NewClothItem } from '../types';
@@ -72,7 +73,7 @@ export default function AiImportDialog({ open, onClose, onAdd }: Props) {
         <Stack spacing={2} sx={{ mt: 1 }}>
           <Typography variant="subtitle2">1. Copy this prompt</Typography>
           <TextField multiline minRows={6} maxRows={10} value={prompt} slotProps={{ input: { readOnly: true } }} />
-          <Button startIcon={<ContentCopyIcon />} onClick={copy} sx={{ alignSelf: 'flex-start' }}>
+          <Button fullWidth size="large" variant="contained" startIcon={<ContentCopyIcon />} onClick={copy}>
             {copied ? 'Copied' : 'Copy prompt'}
           </Button>
 
@@ -95,7 +96,7 @@ export default function AiImportDialog({ open, onClose, onAdd }: Props) {
               setError('');
             }}
           />
-          <Button variant="outlined" disabled={!reply.trim()} onClick={parse} sx={{ alignSelf: 'flex-start' }}>
+          <Button fullWidth size="large" variant="contained" startIcon={<CheckIcon />} disabled={!reply.trim()} onClick={parse}>
             Check
           </Button>
 
@@ -138,9 +139,15 @@ export default function AiImportDialog({ open, onClose, onAdd }: Props) {
           )}
         </Stack>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={close}>Cancel</Button>
-        <Button variant="contained" disabled={!result || result.items.length === 0} onClick={add}>
+      <DialogActions sx={{ px: 3, pb: 2, gap: 1, '& > :not(style) ~ :not(style)': { ml: 0 } }}>
+        <Button variant="outlined" size="large" onClick={close} sx={{ flex: 1, py: 1.5 }}>Cancel</Button>
+        <Button
+          variant="contained"
+          size="large"
+          disabled={!result || result.items.length === 0}
+          onClick={add}
+          sx={{ flex: 1, py: 1.5 }}
+        >
           Add {result ? result.items.length : ''} items
         </Button>
       </DialogActions>

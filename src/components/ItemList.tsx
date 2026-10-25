@@ -1,9 +1,12 @@
 import { useMemo, useState } from 'react';
-import { IconButton, MenuItem, Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Button, IconButton, MenuItem, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import { CATEGORIES, categoryOf } from '../clothTypes';
+import { COLORS } from '../colors';
+import { filterItems, isFiltering, NO_FILTERS, type Filters } from '../filter';
 import { SORT_COLUMNS, sortItems, type SortDir, type SortKey } from '../sort';
 import ItemCards from './ItemCards';
 import ItemTable from './ItemTable';
@@ -32,7 +35,35 @@ export default function ItemList({ items, onEdit, onDelete }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('purchasedDate');
   const [dir, setDir] = useState<SortDir>('desc');
 
-  const sorted = useMemo(() => sortItems(items, sortKey, dir), [items, sortKey, dir]);
+  const [filters, setFilters] = useState<Filters>(NO_FILTERS);
+
+  // only offer values that exist in the closet
+  const options = useMemo(() => {
+    const colors = new Set(items.map((i) => i.color));
+    const cats = new Set(items.map((i) => categoryOf(i.type)));
+    return {
+      categories: CATEGORIES.map((c) => c.name).filter((c) => cats.has(c)),
+      colors: [...COLORS.map((c) => c.name).filter((c) => colors.has(c)), ...[...colors].filter((c) => c && !COLORS.some((x) => x.name === c))],
+      brands: [...new Set(items.map((i) => i.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
+    };
+  }, [items]);
+
+  const shown = useMemo(() => filterItems(items, filters), [items, filters]);
+  const sorted = useMemo(() => sortItems(shown, sortKey, dir), [shown, sortKey, dir]);
+
+  const multi = (label: string, key: 'categories' | 'colors' | 'brands', values: string[]) => (
+    <TextField
+      select
+      size="small"
+      label={label}
+      value={filters[key]}
+      onChange={(e) => setFilters({ ...filters, [key]: e.target.value as unknown as string[] })}
+      slotProps={{ select: { multiple: true, renderValue: (v) => (v as string[]).join(', ') } }}
+      sx={{ minWidth: 140, maxWidth: 220 }}
+    >
+      {values.map((v) => <MenuItem key={v} value={v}>{v}</MenuItem>)}
+    </TextField>
+  );
 
   const changeView = (v: View | null) => {
     if (!v) return;
@@ -70,7 +101,28 @@ export default function ItemList({ items, onEdit, onDelete }: Props) {
           </>
         )}
       </Stack>
-      {view === 'table' ? (
+      <Stack direction="row" useFlexGap spacing={1} sx={{ mb: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+        <TextField
+          size="small"
+          label="Search"
+          placeholder="name, brand, type…"
+          value={filters.text}
+          onChange={(e) => setFilters({ ...filters, text: e.target.value })}
+          sx={{ minWidth: 180 }}
+        />
+        {multi('Category', 'categories', options.categories)}
+        {multi('Color', 'colors', options.colors)}
+        {multi('Brand', 'brands', options.brands)}
+        {isFiltering(filters) && (
+          <>
+            <Button onClick={() => setFilters(NO_FILTERS)}>Clear</Button>
+            <Typography variant="body2" color="text.secondary">{sorted.length} of {items.length} items</Typography>
+          </>
+        )}
+      </Stack>
+      {items.length > 0 && sorted.length === 0 ? (
+        <Typography align="center" color="text.secondary">No items match the filters.</Typography>
+      ) : view === 'table' ? (
         <ItemTable items={sorted} sortKey={sortKey} dir={dir} onSort={toggleSort} onEdit={onEdit} onDelete={onDelete} />
       ) : (
         <ItemCards items={sorted} onEdit={onEdit} onDelete={onDelete} />
