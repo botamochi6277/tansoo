@@ -17,7 +17,8 @@ import {
   Typography,
 } from '@mui/material';
 import { fileToThumbnail } from '../image';
-import { CLOTH_TYPES, typeIcon } from '../clothTypes';
+import { CLOTH_TYPES } from '../clothTypes';
+import TypeIcon from './TypeIcon';
 import { COLORS } from '../colors';
 import type { ClothItem, NewClothItem } from '../types';
 
@@ -77,7 +78,7 @@ export default function ItemForm({ open, initial, brands, onClose, onSubmit }: P
             <FormLabel>Type</FormLabel>
             <RadioGroup row value={form.type} onChange={(e) => set('type', e.target.value)}>
               {typeOptions.map((t) => (
-                <FormControlLabel key={t} value={t} control={<Radio size="small" />} label={`${typeIcon(t)} ${t}`} sx={{ width: '48%', mr: 0 }} />
+                <FormControlLabel key={t} value={t} control={<Radio size="small" />} label={<><TypeIcon type={t} /> {t}</>} sx={{ width: '48%', mr: 0 }} />
               ))}
             </RadioGroup>
           </FormControl>

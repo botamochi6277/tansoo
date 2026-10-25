@@ -1,0 +1,43 @@
+/* Icon font by botamochi6277: https://github.com/botamochi6277/FontBotamochi
+   Only the clothing glyphs (e92f-e946) are listed here. */
+@font-face {
+  font-family: 'FontBotamochi';
+  src: url('./fonts/FontBotamochi.woff') format('woff'), url('./fonts/FontBotamochi.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.fb {
+  font-family: 'FontBotamochi' !important;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.fb-belt:before { content: "\e92f"; }
+.fb-backpack:before { content: "\e931"; }
+.fb-bra:before { content: "\e932"; }
+.fb-coat:before { content: "\e933"; }
+.fb-down-jacket:before { content: "\e934"; }
+.fb-glove:before { content: "\e935"; }
+.fb-hanger:before { content: "\e936"; }
+.fb-hanky:before { content: "\e937"; }
+.fb-hoodie:before { content: "\e938"; }
+.fb-jacket:before { content: "\e939"; }
+.fb-leggings:before { content: "\e93a"; }
+.fb-pants:before { content: "\e93b"; }
+.fb-panty:before { content: "\e93c"; }
+.fb-scarf:before { content: "\e93d"; }
+.fb-shirt:before { content: "\e93e"; }
+.fb-skirt:before { content: "\e93f"; }
+.fb-socks:before { content: "\e940"; }
+.fb-sweater:before { content: "\e941"; }
+.fb-t-shirt-long:before { content: "\e942"; }
+.fb-t-shirt:before { content: "\e943"; }
+.fb-tie:before { content: "\e944"; }
+.fb-towel:before { content: "\e945"; }
+.fb-tranks:before { content: "\e946"; }

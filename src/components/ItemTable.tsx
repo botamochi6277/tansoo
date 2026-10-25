@@ -15,8 +15,8 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { typeIcon } from '../clothTypes';
-import { swatchFor } from '../colors';
+import TypeIcon from './TypeIcon';
+import { inkFor, swatchFor } from '../colors';
 import type { ClothItem } from '../types';
 
 type SortKey = Exclude<keyof ClothItem, 'id'>;
@@ -78,8 +78,19 @@ export default function ItemTable({ items, onEdit, onDelete }: Props) {
           {sorted.map((it) => (
             <TableRow key={it.id} hover>
               <TableCell>
-                <Avatar variant="rounded" src={it.image || undefined} alt={it.name} sx={{ width: 40, height: 40, fontSize: 22, bgcolor: 'action.hover' }}>
-                  {typeIcon(it.type)}
+                <Avatar variant="rounded" src={it.image || undefined} alt={it.name} sx={{
+                    width: 40,
+                    height: 40,
+                    fontSize: 22,
+                    border: 1,
+                    borderColor: 'divider',
+                    // placeholder takes the item's color; unknown colors keep the neutral look
+                    ...(swatchFor(it.color)
+                      ? { background: swatchFor(it.color), color: inkFor(it.color) }
+                      : { bgcolor: 'action.hover', color: 'text.primary' }),
+                  }}
+                >
+                  <TypeIcon type={it.type} />
                 </Avatar>
               </TableCell>
               <TableCell>
@@ -91,7 +102,7 @@ export default function ItemTable({ items, onEdit, onDelete }: Props) {
               </TableCell>
               <TableCell>{it.purchasedDate}</TableCell>
               <TableCell>{it.brand}</TableCell>
-              <TableCell>{it.type && `${typeIcon(it.type)} ${it.type}`}</TableCell>
+              <TableCell>{it.type && <><TypeIcon type={it.type} /> {it.type}</>}</TableCell>
               <TableCell>
                 {swatchFor(it.color) && (
                   <Box

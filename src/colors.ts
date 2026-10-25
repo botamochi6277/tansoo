@@ -29,3 +29,12 @@ export const COLORS: ClothColor[] = [
 
 export const swatchFor = (name: string): string | undefined =>
   COLORS.find((c) => c.name === name)?.swatch;
+
+/** Readable icon/text color to draw on top of a color's swatch. */
+export function inkFor(name: string): string {
+  const swatch = swatchFor(name);
+  const hex = swatch?.match(/^#([0-9a-f]{6})$/i)?.[1];
+  if (!hex) return '#222'; // gradients are all light
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  return 0.299 * r + 0.587 * g + 0.114 * b > 150 ? '#222' : '#fff';
+}
