@@ -2,6 +2,9 @@ import initSqlJs, { Database, SqlJsStatic } from 'sql.js';
 import wasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 import type { ClothItem, NewClothItem } from './types';
 
+/** Thrown by importDb for files without an items table; callers show a translated message. */
+export const NOT_TANSOO_DB = 'NOT_TANSOO_DB';
+
 const STORAGE_KEY = 'smart-closet-db';
 
 const SCHEMA = `
@@ -12,6 +15,7 @@ CREATE TABLE IF NOT EXISTS items (
   brand TEXT NOT NULL,
   type TEXT NOT NULL,
   color TEXT NOT NULL,
+  size TEXT NOT NULL DEFAULT '',
   cost INTEGER NOT NULL,
   image TEXT NOT NULL DEFAULT '',
   url TEXT NOT NULL DEFAULT ''
@@ -38,7 +42,7 @@ function prepare(d: Database): void {
   d.run("UPDATE items SET type='Long T-shirt' WHERE type IN ('Long sleeve T-shirt', 'Long sleeve t-shirt')"); // renamed
   // migrate databases created before image/url existed
   const cols = d.exec('PRAGMA table_info(items)')[0].values.map((r) => r[1]);
-  for (const col of ['image', 'url']) {
+  for (const col of ['image', 'url', 'size']) {
     if (!cols.includes(col)) d.run(`ALTER TABLE items ADD COLUMN ${col} TEXT NOT NULL DEFAULT ''`);
   }
 }
@@ -65,7 +69,7 @@ export function importDb(bytes: Uint8Array): void {
   const next = new SQL.Database(bytes);
   try {
     const has = next.exec("SELECT 1 FROM sqlite_master WHERE type='table' AND name='items'");
-    if (has.length === 0) throw new Error('This file is not a Tansoo database.');
+    if (has.length === 0) throw new Error(NOT_TANSOO_DB);
     prepare(next);
   } catch (e) {
     next.close();
@@ -76,17 +80,26 @@ export function importDb(bytes: Uint8Array): void {
   persist();
 }
 
+let onPersist: ((bytes: Uint8Array) => void) | null = null;
+
+/** Called with the database bytes after every change (used to mirror to a file). */
+export function setPersistListener(f: ((bytes: Uint8Array) => void) | null): void {
+  onPersist = f;
+}
+
 function persist(): void {
+  const bytes = db.export();
   try {
-    localStorage.setItem(STORAGE_KEY, toBase64(db.export()));
+    localStorage.setItem(STORAGE_KEY, toBase64(bytes));
   } catch {
     /* storage unavailable or full */
   }
+  onPersist?.(bytes);
 }
 
 export function listItems(): ClothItem[] {
   const res = db.exec(
-    'SELECT id, name, purchased_date, brand, type, color, cost, image, url FROM items',
+    'SELECT id, name, purchased_date, brand, type, color, cost, image, url, size FROM items',
   );
   if (res.length === 0) return [];
   return res[0].values.map((r) => ({
@@ -99,21 +112,22 @@ export function listItems(): ClothItem[] {
     cost: r[6] as number,
     image: r[7] as string,
     url: r[8] as string,
+    size: r[9] as string,
   }));
 }
 
 export function addItem(i: NewClothItem): void {
   db.run(
-    'INSERT INTO items (name, purchased_date, brand, type, color, cost, image, url) VALUES (?,?,?,?,?,?,?,?)',
-    [i.name, i.purchasedDate, i.brand, i.type, i.color, i.cost, i.image, i.url],
+    'INSERT INTO items (name, purchased_date, brand, type, color, cost, image, url, size) VALUES (?,?,?,?,?,?,?,?,?)',
+    [i.name, i.purchasedDate, i.brand, i.type, i.color, i.cost, i.image, i.url, i.size],
   );
   persist();
 }
 
 export function updateItem(i: ClothItem): void {
   db.run(
-    'UPDATE items SET name=?, purchased_date=?, brand=?, type=?, color=?, cost=?, image=?, url=? WHERE id=?',
-    [i.name, i.purchasedDate, i.brand, i.type, i.color, i.cost, i.image, i.url, i.id],
+    'UPDATE items SET name=?, purchased_date=?, brand=?, type=?, color=?, cost=?, image=?, url=?, size=? WHERE id=?',
+    [i.name, i.purchasedDate, i.brand, i.type, i.color, i.cost, i.image, i.url, i.size, i.id],
   );
   persist();
 }

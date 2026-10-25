@@ -10,7 +10,9 @@ export const COLORS: ClothColor[] = [
   { name: 'Light gray', swatch: '#c9ced6' },
   { name: 'Dark gray', swatch: '#6b7280' },
   { name: 'Brown', swatch: '#7d5c47' },
+  { name: 'Navy', swatch: '#2b3a67' },
   { name: 'Beige', swatch: '#dfd1ad' },
+  { name: 'Khaki', swatch: '#a8a06a' },
   { name: 'Green', swatch: '#a1d85f' },
   { name: 'Blue', swatch: '#4bbbea' },
   { name: 'Purple', swatch: '#ae8cee' },
@@ -28,3 +30,12 @@ export const COLORS: ClothColor[] = [
 
 export const swatchFor = (name: string): string | undefined =>
   COLORS.find((c) => c.name === name)?.swatch;
+
+/** Readable icon/text color to draw on top of a color's swatch. */
+export function inkFor(name: string): string {
+  const swatch = swatchFor(name);
+  const hex = swatch?.match(/^#([0-9a-f]{6})$/i)?.[1];
+  if (!hex) return '#222'; // gradients are all light
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  return 0.299 * r + 0.587 * g + 0.114 * b > 150 ? '#222' : '#fff';
+}
