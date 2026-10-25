@@ -11,7 +11,9 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import TranslateIcon from '@mui/icons-material/Translate';
 import * as db from './db';
+import { useI18n } from './i18n';
 import * as fs from './fileStore';
 import type { ClothItem, NewClothItem } from './types';
 import ItemForm from './components/ItemForm';
@@ -32,6 +34,7 @@ function savedMode(): Mode | null {
 }
 
 export default function App() {
+  const { t, lang, setLang } = useI18n();
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)');
   const [userMode, setUserMode] = useState<Mode | null>(savedMode);
   const mode: Mode = userMode ?? (prefersDark ? 'dark' : 'light');
@@ -130,13 +133,13 @@ export default function App() {
   }, [fileStatus]);
 
   const reportError = (e: unknown) =>
-    window.alert(e instanceof Error && e.message.startsWith('This file') ? e.message : 'Could not use that file.');
+    window.alert(e instanceof Error && e.message === db.NOT_TANSOO_DB ? t('err.notDb') : t('err.useFile'));
 
   const openFile = async () => {
     try {
       const h = await fs.pickExisting();
       if (!h) return;
-      if (!window.confirm(`Load items from "${h.name}"? This replaces all current items.`)) return;
+      if (!window.confirm(t('confirm.load', { name: h.name }))) return;
       unlink();
       if (!(await fs.hasPermission(h, true))) return;
       await loadFrom(h);
@@ -168,7 +171,7 @@ export default function App() {
         await fs.writeBytes(h, db.exportDb());
         link(h);
       } else {
-        if (!window.confirm(`Load items from "${h.name}"? This replaces the items currently shown.`)) return;
+        if (!window.confirm(t('confirm.reload', { name: h.name }))) return;
         await loadFrom(h);
       }
     } catch (e) {
@@ -189,7 +192,7 @@ export default function App() {
   };
 
   const remove = (item: ClothItem) => {
-    if (!window.confirm(`Delete "${item.name}"?`)) return;
+    if (!window.confirm(t('confirm.delete', { name: item.name }))) return;
     db.deleteItem(item.id);
     refresh();
   };
@@ -204,12 +207,12 @@ export default function App() {
   };
 
   const importFile = async (file: File) => {
-    if (!window.confirm('Importing replaces all current items. Continue?')) return;
+    if (!window.confirm(t('confirm.import'))) return;
     try {
       db.importDb(new Uint8Array(await file.arrayBuffer()));
       refresh();
     } catch (e) {
-      window.alert(e instanceof Error && e.message.startsWith('This file') ? e.message : 'Could not read that file as a SQLite database.');
+      window.alert(e instanceof Error && e.message === db.NOT_TANSOO_DB ? t('err.notDb') : t('err.badFile'));
     }
   };
 
@@ -224,28 +227,28 @@ export default function App() {
           {fsSupported ? (
             <>
               {fileStatus === 'linked' && (
-                <Chip color="success" size="small" label={fileName} title="Changes are saved to this file" onDelete={unlink} sx={{ ml: 1 }} />
+                <Chip color="success" size="small" label={fileName} title={t('file.linkedTitle')} onDelete={unlink} sx={{ ml: 1 }} />
               )}
               {fileStatus === 'reconnect' && (
-                <Chip color="warning" size="small" label={`Reconnect ${fileName}`} onClick={reconnect} sx={{ ml: 1 }} />
+                <Chip color="warning" size="small" label={t('file.reconnect', { name: fileName })} onClick={reconnect} sx={{ ml: 1 }} />
               )}
               {fileStatus === 'error' && (
-                <Chip color="error" size="small" label={`Save failed: ${fileName}`} onClick={reconnect} sx={{ ml: 1 }} />
+                <Chip color="error" size="small" label={t('file.saveFailed', { name: fileName })} onClick={reconnect} sx={{ ml: 1 }} />
               )}
               <Button color="inherit" startIcon={<FolderOpenIcon />} disabled={!ready} onClick={openFile} sx={{ ml: 1 }}>
-                Open file
+                {t('btn.openFile')}
               </Button>
               <Button color="inherit" startIcon={<NoteAddIcon />} disabled={!ready} onClick={newFile} sx={{ ml: 1 }}>
-                New file
+                {t('btn.newFile')}
               </Button>
             </>
           ) : (
             <>
               <Button color="inherit" startIcon={<FileDownloadIcon />} disabled={!ready} onClick={exportFile} sx={{ ml: 1 }}>
-                Export
+                {t('btn.export')}
               </Button>
               <Button color="inherit" startIcon={<FileUploadIcon />} disabled={!ready} component="label" sx={{ ml: 1 }}>
-                Import
+                {t('btn.import')}
                 <input
                   hidden
                   type="file"
@@ -259,18 +262,21 @@ export default function App() {
               </Button>
             </>
           )}
-          <IconButton color="inherit" aria-label="toggle dark mode" onClick={toggleMode} sx={{ ml: 1 }}>
+          <Button color="inherit" startIcon={<TranslateIcon />} aria-label={t('toggle.lang')} onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')} sx={{ ml: 1 }}>
+            {t('lang.other')}
+          </Button>
+          <IconButton color="inherit" aria-label={t('toggle.dark')} onClick={toggleMode} sx={{ ml: 1 }}>
             {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
           </IconButton>
         </Toolbar>
       </AppBar>
       <Container sx={{ py: 3 }}>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
-          <Tab label="Items" />
-          <Tab label="Stats" />
+          <Tab label={t('tab.items')} />
+          <Tab label={t('tab.stats')} />
         </Tabs>
         {!ready ? (
-          <Box>Loading…</Box>
+          <Box>{t('app.loading')}</Box>
         ) : tab === 0 ? (
           <>
             <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
@@ -281,7 +287,7 @@ export default function App() {
                 startIcon={<AddIcon />}
                 onClick={() => { setEditing(null); setFormOpen(true); }}
               >
-                Add new item
+                {t('btn.add')}
               </Button>
               <Button
                 fullWidth
@@ -290,7 +296,7 @@ export default function App() {
                 startIcon={<AutoAwesomeIcon />}
                 onClick={() => setAiOpen(true)}
               >
-                Add by your AI
+                {t('btn.ai')}
               </Button>
             </Stack>
             <ItemList items={items} onEdit={(i) => { setEditing(i); setFormOpen(true); }} onDelete={remove} />

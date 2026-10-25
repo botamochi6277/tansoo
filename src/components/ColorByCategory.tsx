@@ -1,6 +1,7 @@
 import { Box, Card, CardContent, Tooltip, Typography } from '@mui/material';
 import { CATEGORIES, categoryOf } from '../clothTypes';
 import { COLORS, swatchFor } from '../colors';
+import { useI18n } from '../i18n';
 import type { ClothItem } from '../types';
 
 const UNSPECIFIED = 'Unspecified';
@@ -29,19 +30,21 @@ const BAR_HEIGHT = 22;
 const LABEL_SPACE = 12; // % of the track kept free for the value at the bar tip
 
 export default function ColorByCategory({ items }: { items: ClothItem[] }) {
+  const { t, count, categoryLabel, colorLabel } = useI18n();
+  const colorName = (c: string) => (c === UNSPECIFIED ? t('stats.unspecified') : colorLabel(c));
   const { rows, order } = tally(items);
   const max = Math.max(...rows.map((r) => r.total));
 
   return (
     <Card>
       <CardContent>
-        <Typography variant="h6" gutterBottom>Colors by category (items)</Typography>
+        <Typography variant="h6" gutterBottom>{t('stats.colorsByCategory')}</Typography>
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mb: 2 }}>
           {order.map((c) => (
             <Box key={c} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <Box sx={{ width: 12, height: 12, borderRadius: 0.5, border: 1, borderColor: 'divider', background: fill(c) }} />
-              <Typography variant="caption">{c}</Typography>
+              <Typography variant="caption">{colorName(c)}</Typography>
             </Box>
           ))}
         </Box>
@@ -49,7 +52,7 @@ export default function ColorByCategory({ items }: { items: ClothItem[] }) {
         <Box role="list" sx={{ display: 'grid', gridTemplateColumns: 'max-content 1fr', columnGap: 2, rowGap: 1, alignItems: 'center' }}>
           {rows.map((r) => (
             <Box key={r.category} role="listitem" sx={{ display: 'contents' }}>
-              <Typography variant="body2">{r.category}</Typography>
+              <Typography variant="body2">{categoryLabel(r.category)}</Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box sx={{ display: 'flex', gap: '2px', width: `${(r.total / max) * (100 - LABEL_SPACE)}%`, minWidth: 8 }}>
                   {order
@@ -58,11 +61,11 @@ export default function ColorByCategory({ items }: { items: ClothItem[] }) {
                       const n = r.counts.get(c)!;
                       const last = i === present.length - 1;
                       return (
-                        <Tooltip key={c} arrow title={`${r.category} · ${c}: ${n} item${n > 1 ? 's' : ''}`}>
+                        <Tooltip key={c} arrow title={`${categoryLabel(r.category)} · ${colorName(c)}: ${count(n)}`}>
                           <Box
                             tabIndex={0}
                             role="img"
-                            aria-label={`${r.category}, ${c}: ${n} item${n > 1 ? 's' : ''}`}
+                            aria-label={`${categoryLabel(r.category)}, ${colorName(c)}: ${count(n)}`}
                             sx={{
                               flex: n,
                               minWidth: 4,

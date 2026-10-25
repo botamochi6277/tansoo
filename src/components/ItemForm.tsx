@@ -19,6 +19,7 @@ import {
 import { fileToThumbnail } from '../image';
 import { CATEGORIES, CLOTH_TYPES } from '../clothTypes';
 import TypeIcon from './TypeIcon';
+import { useI18n } from '../i18n';
 import { COLORS } from '../colors';
 import type { ClothItem, NewClothItem } from '../types';
 
@@ -45,6 +46,7 @@ const empty = (): NewClothItem => ({
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free'];
 
 export default function ItemForm({ open, initial, brands, onClose, onSubmit }: Props) {
+  const { t, typeLabel, categoryLabel, colorLabel } = useI18n();
   const [form, setForm] = useState<NewClothItem>(empty());
 
   useEffect(() => {
@@ -61,30 +63,30 @@ export default function ItemForm({ open, initial, brands, onClose, onSubmit }: P
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>{initial ? 'Edit item' : 'Add item'}</DialogTitle>
+      <DialogTitle>{initial ? t('form.edit') : t('form.add')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <TextField label="Name" value={form.name} onChange={(e) => set('name', e.target.value)} autoFocus required />
+          <TextField label={t('col.name')} value={form.name} onChange={(e) => set('name', e.target.value)} autoFocus required />
           <TextField
-            label="Purchased date"
+            label={t('form.purchasedDate')}
             type="date"
             value={form.purchasedDate}
             onChange={(e) => set('purchasedDate', e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
           />
-          <TextField label="Brand" value={form.brand} onChange={(e) => set('brand', e.target.value)} slotProps={{ htmlInput: { list: 'brands' } }} />
+          <TextField label={t('col.brand')} value={form.brand} onChange={(e) => set('brand', e.target.value)} slotProps={{ htmlInput: { list: 'brands' } }} />
           <datalist id="brands">{brands.map((b) => <option key={b} value={b} />)}</datalist>
           <FormControl>
-            <FormLabel>Type</FormLabel>
+            <FormLabel>{t('col.type')}</FormLabel>
             <RadioGroup value={form.type} onChange={(e) => set('type', e.target.value)}>
               {CATEGORIES.map((cat) => {
                 const types = cat.name === 'Other' && legacyType ? [...cat.types, legacyType] : cat.types;
                 return (
                   <Box key={cat.name} sx={{ mb: 1 }}>
-                    <Typography variant="caption" color="text.secondary">{cat.name}</Typography>
+                    <Typography variant="caption" color="text.secondary">{categoryLabel(cat.name)}</Typography>
                     <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)' }}>
-                      {types.map((t) => (
-                        <FormControlLabel key={t} value={t} control={<Radio size="small" />} label={<><TypeIcon type={t} /> {t}</>} sx={{ mr: 0 }} />
+                      {types.map((ty) => (
+                        <FormControlLabel key={ty} value={ty} control={<Radio size="small" />} label={<><TypeIcon type={ty} /> {typeLabel(ty)}</>} sx={{ mr: 0 }} />
                       ))}
                     </Box>
                   </Box>
@@ -93,7 +95,7 @@ export default function ItemForm({ open, initial, brands, onClose, onSubmit }: P
             </RadioGroup>
           </FormControl>
           <Box>
-            <Typography variant="body2" color="text.secondary" gutterBottom>Color</Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>{t('col.color')}</Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1 }}>
               {COLORS.map((c) => {
                 const selected = form.color === c.name;
@@ -105,41 +107,41 @@ export default function ItemForm({ open, initial, brands, onClose, onSubmit }: P
                     sx={{ justifyContent: 'flex-start', gap: 1, p: 0.5, borderRadius: 1, border: 2, borderColor: selected ? 'primary.main' : 'transparent' }}
                   >
                     <Box sx={{ width: 28, height: 28, borderRadius: '50%', border: 1, borderColor: 'divider', background: c.swatch, flexShrink: 0 }} />
-                    <Typography variant="body2">{c.name}</Typography>
+                    <Typography variant="body2">{colorLabel(c.name)}</Typography>
                   </ButtonBase>
                 );
               })}
             </Box>
           </Box>
           <TextField
-            label="Size (optional)"
+            label={t('form.size')}
             value={form.size}
             onChange={(e) => set('size', e.target.value)}
-            placeholder="e.g. M, 30, 26.5"
+            placeholder={t('form.sizePh')}
             slotProps={{ htmlInput: { list: 'sizes' } }}
           />
           <datalist id="sizes">{SIZES.map((z) => <option key={z} value={z} />)}</datalist>
           <TextField
-            label="Cost (yen)"
+            label={t('form.cost')}
             type="number"
             value={form.cost}
             onChange={(e) => set('cost', Math.max(0, Math.round(Number(e.target.value))))}
           />
           <TextField
-            label="URL"
+            label={t('form.url')}
             type="url"
             placeholder="https://"
             value={form.url}
             onChange={(e) => set('url', e.target.value)}
           />
           <Box>
-            <Typography variant="body2" color="text.secondary" gutterBottom>Image</Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>{t('form.image')}</Typography>
             <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
               {form.image && (
                 <Box component="img" src={form.image} alt="" sx={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 1 }} />
               )}
               <Button component="label" variant="outlined" size="small">
-                {form.image ? 'Change' : 'Choose image'}
+                {form.image ? t('form.change') : t('form.choose')}
                 <input
                   hidden
                   type="file"
@@ -151,20 +153,20 @@ export default function ItemForm({ open, initial, brands, onClose, onSubmit }: P
                     try {
                       set('image', await fileToThumbnail(file));
                     } catch {
-                      window.alert('Could not read that image.');
+                      window.alert(t('form.imgErr'));
                     }
                   }}
                 />
               </Button>
-              {form.image && <Button size="small" onClick={() => set('image', '')}>Remove</Button>}
+              {form.image && <Button size="small" onClick={() => set('image', '')}>{t('form.remove')}</Button>}
             </Stack>
           </Box>
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>{t('common.cancel')}</Button>
         <Button variant="contained" disabled={!valid} onClick={() => onSubmit(form, initial?.id)}>
-          Save
+          {t('common.save')}
         </Button>
       </DialogActions>
     </Dialog>

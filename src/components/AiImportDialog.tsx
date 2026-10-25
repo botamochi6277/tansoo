@@ -18,6 +18,7 @@ import {
 import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { buildPrompt, parseAiReply, type ParseResult } from '../aiImport';
+import { useI18n } from '../i18n';
 import type { NewClothItem } from '../types';
 
 interface Props {
@@ -27,7 +28,8 @@ interface Props {
 }
 
 export default function AiImportDialog({ open, onClose, onAdd }: Props) {
-  const prompt = useMemo(buildPrompt, []);
+  const { t, lang, count, typeLabel, colorLabel } = useI18n();
+  const prompt = useMemo(() => buildPrompt(lang), [lang]);
   const [copied, setCopied] = useState(false);
   const [reply, setReply] = useState('');
   const [result, setResult] = useState<ParseResult | null>(null);
@@ -46,17 +48,17 @@ export default function AiImportDialog({ open, onClose, onAdd }: Props) {
       await navigator.clipboard.writeText(prompt);
       setCopied(true);
     } catch {
-      window.alert('Could not copy automatically. Select the prompt text and copy it by hand.');
+      window.alert(t('ai.copyFail'));
     }
   };
 
   const parse = () => {
     try {
-      setResult(parseAiReply(reply));
+      setResult(parseAiReply(reply, t));
       setError('');
     } catch (e) {
       setResult(null);
-      setError(e instanceof Error ? e.message : 'Could not read the pasted text.');
+      setError(e instanceof Error ? e.message : t('ai.readFail'));
     }
   };
 
@@ -68,22 +70,21 @@ export default function AiImportDialog({ open, onClose, onAdd }: Props) {
 
   return (
     <Dialog open={open} onClose={close} fullWidth maxWidth="md">
-      <DialogTitle>Add by your AI</DialogTitle>
+      <DialogTitle>{t('ai.title')}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <Typography variant="subtitle2">1. Copy this prompt</Typography>
+          <Typography variant="subtitle2">{t('ai.step1')}</Typography>
           <TextField multiline minRows={6} maxRows={10} value={prompt} slotProps={{ input: { readOnly: true } }} />
           <Button fullWidth size="large" variant="contained" startIcon={<ContentCopyIcon />} onClick={copy}>
-            {copied ? 'Copied' : 'Copy prompt'}
+            {copied ? t('ai.copied') : t('ai.copy')}
           </Button>
 
-          <Typography variant="subtitle2">2. Send it to your AI</Typography>
+          <Typography variant="subtitle2">{t('ai.step2')}</Typography>
           <Typography variant="body2" color="text.secondary">
-            Open your order history page (e.g. UNIQLO) and give it to your AI model (Gemini, GPT, …) together with the prompt.
-            It replies with a list of the items you bought.
+            {t('ai.step2Body')}
           </Typography>
 
-          <Typography variant="subtitle2">3. Paste the AI's reply</Typography>
+          <Typography variant="subtitle2">{t('ai.step3')}</Typography>
           <TextField
             multiline
             minRows={5}
@@ -97,7 +98,7 @@ export default function AiImportDialog({ open, onClose, onAdd }: Props) {
             }}
           />
           <Button fullWidth size="large" variant="contained" startIcon={<CheckIcon />} disabled={!reply.trim()} onClick={parse}>
-            Check
+            {t('ai.check')}
           </Button>
 
           {error && <Alert severity="error">{error}</Alert>}
@@ -108,17 +109,17 @@ export default function AiImportDialog({ open, onClose, onAdd }: Props) {
                   {result.warnings.map((w) => <div key={w}>{w}</div>)}
                 </Alert>
               )}
-              <Typography variant="subtitle2">{result.items.length} item(s) will be added</Typography>
+              <Typography variant="subtitle2">{t('ai.willAdd', { items: count(result.items.length) })}</Typography>
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Purchased</TableCell>
-                    <TableCell>Brand</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Color</TableCell>
-                    <TableCell>Size</TableCell>
-                    <TableCell align="right">Cost (¥)</TableCell>
+                    <TableCell>{t('col.name')}</TableCell>
+                    <TableCell>{t('col.purchasedDate')}</TableCell>
+                    <TableCell>{t('col.brand')}</TableCell>
+                    <TableCell>{t('col.type')}</TableCell>
+                    <TableCell>{t('col.color')}</TableCell>
+                    <TableCell>{t('col.size')}</TableCell>
+                    <TableCell align="right">{t('col.cost')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -127,8 +128,8 @@ export default function AiImportDialog({ open, onClose, onAdd }: Props) {
                       <TableCell>{it.name}</TableCell>
                       <TableCell>{it.purchasedDate}</TableCell>
                       <TableCell>{it.brand}</TableCell>
-                      <TableCell>{it.type}</TableCell>
-                      <TableCell>{it.color}</TableCell>
+                      <TableCell>{typeLabel(it.type)}</TableCell>
+                      <TableCell>{colorLabel(it.color)}</TableCell>
                       <TableCell>{it.size}</TableCell>
                       <TableCell align="right">{it.cost.toLocaleString()}</TableCell>
                     </TableRow>
@@ -140,7 +141,7 @@ export default function AiImportDialog({ open, onClose, onAdd }: Props) {
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2, gap: 1, '& > :not(style) ~ :not(style)': { ml: 0 } }}>
-        <Button variant="outlined" size="large" onClick={close} sx={{ flex: 1, py: 1.5 }}>Cancel</Button>
+        <Button variant="outlined" size="large" onClick={close} sx={{ flex: 1, py: 1.5 }}>{t('common.cancel')}</Button>
         <Button
           variant="contained"
           size="large"
@@ -148,7 +149,7 @@ export default function AiImportDialog({ open, onClose, onAdd }: Props) {
           onClick={add}
           sx={{ flex: 1, py: 1.5 }}
         >
-          Add {result ? result.items.length : ''} items
+          {t('ai.add', { n: result ? result.items.length : '' })}
         </Button>
       </DialogActions>
     </Dialog>

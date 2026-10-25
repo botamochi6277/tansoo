@@ -2,6 +2,9 @@ import initSqlJs, { Database, SqlJsStatic } from 'sql.js';
 import wasmUrl from 'sql.js/dist/sql-wasm.wasm?url';
 import type { ClothItem, NewClothItem } from './types';
 
+/** Thrown by importDb for files without an items table; callers show a translated message. */
+export const NOT_TANSOO_DB = 'NOT_TANSOO_DB';
+
 const STORAGE_KEY = 'smart-closet-db';
 
 const SCHEMA = `
@@ -66,7 +69,7 @@ export function importDb(bytes: Uint8Array): void {
   const next = new SQL.Database(bytes);
   try {
     const has = next.exec("SELECT 1 FROM sqlite_master WHERE type='table' AND name='items'");
-    if (has.length === 0) throw new Error('This file is not a Tansoo database.');
+    if (has.length === 0) throw new Error(NOT_TANSOO_DB);
     prepare(next);
   } catch (e) {
     next.close();

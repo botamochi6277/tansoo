@@ -12,6 +12,7 @@ A user can
 1. sort the items by any column
 1. analyze stats (item count, total/average cost, breakdowns by brand, category, type, and color)
 1. switch between light and dark mode (follows the system setting by default)
+1. switch the display language between English and Japanese (follows the browser language by default; type, category, and color names are translated for display only, the stored data stays language independent)
 1. keep the data in a `.sqlite` file, or export/import it
 
 ## Cloth item properties
