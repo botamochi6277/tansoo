@@ -10,6 +10,7 @@ export const COLORS: ClothColor[] = [
   { name: 'Light gray', swatch: '#c9ced6' },
   { name: 'Dark gray', swatch: '#6b7280' },
   { name: 'Brown', swatch: '#7d5c47' },
+  { name: 'Navy', swatch: '#2b3a67' },
   { name: 'Beige', swatch: '#dfd1ad' },
   { name: 'Green', swatch: '#a1d85f' },
   { name: 'Blue', swatch: '#4bbbea' },

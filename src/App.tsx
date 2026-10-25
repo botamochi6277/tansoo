@@ -213,14 +213,6 @@ export default function App() {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>Tansoo</Typography>
-          <Button
-            color="inherit"
-            startIcon={<AddIcon />}
-            disabled={!ready}
-            onClick={() => { setEditing(null); setFormOpen(true); }}
-          >
-            Add item
-          </Button>
           {fsSupported ? (
             <>
               {fileStatus === 'linked' && (
@@ -272,7 +264,19 @@ export default function App() {
         {!ready ? (
           <Box>Loading…</Box>
         ) : tab === 0 ? (
-          <ItemTable items={items} onEdit={(i) => { setEditing(i); setFormOpen(true); }} onDelete={remove} />
+          <>
+            <Button
+              fullWidth
+              variant="contained"
+              size="large"
+              startIcon={<AddIcon />}
+              onClick={() => { setEditing(null); setFormOpen(true); }}
+              sx={{ mb: 2 }}
+            >
+              Add new item
+            </Button>
+            <ItemTable items={items} onEdit={(i) => { setEditing(i); setFormOpen(true); }} onDelete={remove} />
+          </>
         ) : (
           <Stats items={items} />
         )}

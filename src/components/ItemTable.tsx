@@ -27,6 +27,7 @@ const columns: { key: SortKey; label: string; numeric?: boolean }[] = [
   { key: 'brand', label: 'Brand' },
   { key: 'type', label: 'Type' },
   { key: 'color', label: 'Color' },
+  { key: 'size', label: 'Size' },
   { key: 'cost', label: 'Cost (¥)', numeric: true },
 ];
 
@@ -100,6 +101,7 @@ export default function ItemTable({ items, onEdit, onDelete }: Props) {
                 )}
                 {it.color}
               </TableCell>
+              <TableCell>{it.size}</TableCell>
               <TableCell align="right">{it.cost.toLocaleString()}</TableCell>
               <TableCell align="right">
                 <IconButton size="small" aria-label="edit" onClick={() => onEdit(it)}><EditIcon fontSize="small" /></IconButton>
@@ -109,7 +111,7 @@ export default function ItemTable({ items, onEdit, onDelete }: Props) {
           ))}
           {sorted.length === 0 && (
             <TableRow>
-              <TableCell colSpan={8} align="center">No items yet. Add your first cloth item.</TableCell>
+              <TableCell colSpan={9} align="center">No items yet. Add your first cloth item.</TableCell>
             </TableRow>
           )}
         </TableBody>

@@ -36,9 +36,12 @@ const empty = (): NewClothItem => ({
   type: '',
   color: '',
   cost: 0,
+  size: '',
   image: '',
   url: '',
 });
+
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free'];
 
 export default function ItemForm({ open, initial, brands, onClose, onSubmit }: Props) {
   const [form, setForm] = useState<NewClothItem>(empty());
@@ -97,6 +100,14 @@ export default function ItemForm({ open, initial, brands, onClose, onSubmit }: P
               })}
             </Box>
           </Box>
+          <TextField
+            label="Size (optional)"
+            value={form.size}
+            onChange={(e) => set('size', e.target.value)}
+            placeholder="e.g. M, 30, 26.5"
+            slotProps={{ htmlInput: { list: 'sizes' } }}
+          />
+          <datalist id="sizes">{SIZES.map((z) => <option key={z} value={z} />)}</datalist>
           <TextField
             label="Cost (yen)"
             type="number"
