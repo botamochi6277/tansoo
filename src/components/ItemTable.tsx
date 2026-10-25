@@ -1,6 +1,4 @@
-import { useMemo, useState } from 'react';
 import {
-  Avatar,
   Box,
   Link,
   IconButton,
@@ -17,60 +15,31 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { categoryOf } from '../clothTypes';
 import TypeIcon from './TypeIcon';
-import { inkFor, swatchFor } from '../colors';
+import { swatchFor } from '../colors';
+import { SORT_COLUMNS, type SortDir, type SortKey } from '../sort';
+import ItemThumb from './ItemThumb';
 import type { ClothItem } from '../types';
 
-type SortKey = Exclude<keyof ClothItem, 'id'> | 'category';
-
-const valueOf = (it: ClothItem, k: SortKey) => (k === 'category' ? categoryOf(it.type) : it[k]);
-
-const columns: { key: SortKey; label: string; numeric?: boolean }[] = [
-  { key: 'name', label: 'Name' },
-  { key: 'purchasedDate', label: 'Purchased' },
-  { key: 'brand', label: 'Brand' },
-  { key: 'category', label: 'Category' },
-  { key: 'type', label: 'Type' },
-  { key: 'color', label: 'Color' },
-  { key: 'size', label: 'Size' },
-  { key: 'cost', label: 'Cost (¥)', numeric: true },
-];
-
 interface Props {
+  /** already sorted */
   items: ClothItem[];
+  sortKey: SortKey;
+  dir: SortDir;
+  onSort: (key: SortKey) => void;
   onEdit: (item: ClothItem) => void;
   onDelete: (item: ClothItem) => void;
 }
 
-export default function ItemTable({ items, onEdit, onDelete }: Props) {
-  const [sortKey, setSortKey] = useState<SortKey>('purchasedDate');
-  const [dir, setDir] = useState<'asc' | 'desc'>('desc');
-
-  const sorted = useMemo(() => {
-    const sign = dir === 'asc' ? 1 : -1;
-    return [...items].sort((a, b) => {
-      const x = valueOf(a, sortKey);
-      const y = valueOf(b, sortKey);
-      return (typeof x === 'number' ? x - (y as number) : String(x).localeCompare(String(y))) * sign;
-    });
-  }, [items, sortKey, dir]);
-
-  const toggle = (k: SortKey) => {
-    if (k === sortKey) setDir(dir === 'asc' ? 'desc' : 'asc');
-    else {
-      setSortKey(k);
-      setDir('asc');
-    }
-  };
-
+export default function ItemTable({ items, sortKey, dir, onSort, onEdit, onDelete }: Props) {
   return (
     <TableContainer component={Paper}>
       <Table size="small">
         <TableHead>
           <TableRow>
             <TableCell />
-            {columns.map((c) => (
+            {SORT_COLUMNS.map((c) => (
               <TableCell key={c.key} align={c.numeric ? 'right' : 'left'} sortDirection={sortKey === c.key ? dir : false}>
-                <TableSortLabel active={sortKey === c.key} direction={sortKey === c.key ? dir : 'asc'} onClick={() => toggle(c.key)}>
+                <TableSortLabel active={sortKey === c.key} direction={sortKey === c.key ? dir : 'asc'} onClick={() => onSort(c.key)}>
                   {c.label}
                 </TableSortLabel>
               </TableCell>
@@ -79,23 +48,10 @@ export default function ItemTable({ items, onEdit, onDelete }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {sorted.map((it) => (
+          {items.map((it) => (
             <TableRow key={it.id} hover>
               <TableCell>
-                <Avatar variant="rounded" src={it.image || undefined} alt={it.name} sx={{
-                    width: 40,
-                    height: 40,
-                    fontSize: 22,
-                    border: 1,
-                    borderColor: 'divider',
-                    // placeholder takes the item's color; unknown colors keep the neutral look
-                    ...(swatchFor(it.color)
-                      ? { background: swatchFor(it.color), color: inkFor(it.color) }
-                      : { bgcolor: 'action.hover', color: 'text.primary' }),
-                  }}
-                >
-                  <TypeIcon type={it.type} />
-                </Avatar>
+                <ItemThumb item={it} size={40} fontSize={22} />
               </TableCell>
               <TableCell>
                 {/^https?:\/\//i.test(it.url) ? (
@@ -125,7 +81,7 @@ export default function ItemTable({ items, onEdit, onDelete }: Props) {
               </TableCell>
             </TableRow>
           ))}
-          {sorted.length === 0 && (
+          {items.length === 0 && (
             <TableRow>
               <TableCell colSpan={10} align="center">No items yet. Add your first cloth item.</TableCell>
             </TableRow>

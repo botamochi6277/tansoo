@@ -14,7 +14,7 @@ import * as db from './db';
 import * as fs from './fileStore';
 import type { ClothItem, NewClothItem } from './types';
 import ItemForm from './components/ItemForm';
-import ItemTable from './components/ItemTable';
+import ItemList from './components/ItemList';
 import Stats from './components/Stats';
 
 const MODE_KEY = 'smart-closet-mode';
@@ -275,7 +275,7 @@ export default function App() {
             >
               Add new item
             </Button>
-            <ItemTable items={items} onEdit={(i) => { setEditing(i); setFormOpen(true); }} onDelete={remove} />
+            <ItemList items={items} onEdit={(i) => { setEditing(i); setFormOpen(true); }} onDelete={remove} />
           </>
         ) : (
           <Stats items={items} />
