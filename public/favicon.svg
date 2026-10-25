@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Tansoo">
+  <title>Tansoo</title>
+  <!-- feet -->
+  <rect x="12" y="57" width="8" height="5" rx="1.5" fill="#6e4529"/>
+  <rect x="44" y="57" width="8" height="5" rx="1.5" fill="#6e4529"/>
+  <!-- body and top board -->
+  <rect x="8" y="8" width="48" height="51" rx="5" fill="#8a5a3b"/>
+  <rect x="5" y="3" width="54" height="9" rx="3.5" fill="#6e4529"/>
+  <!-- drawers -->
+  <g fill="#f4e1c1" stroke="#c79a6b" stroke-width="1.5">
+    <rect x="13" y="16" width="38" height="11" rx="2"/>
+    <rect x="13" y="30" width="38" height="11" rx="2"/>
+    <rect x="13" y="44" width="38" height="11" rx="2"/>
+  </g>
+  <!-- knobs -->
+  <g fill="#8a5a3b">
+    <circle cx="32" cy="21.5" r="2.3"/>
+    <circle cx="32" cy="35.5" r="2.3"/>
+    <circle cx="32" cy="49.5" r="2.3"/>
+  </g>
+</svg>

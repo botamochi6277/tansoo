@@ -223,6 +223,7 @@ export default function App() {
       <CssBaseline enableColorScheme />
       <AppBar position="static">
         <Toolbar>
+          <Box component="img" src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" sx={{ height: 34, mr: 1 }} />
           <Typography variant="h6" sx={{ flexGrow: 1 }}>Tansoo</Typography>
           {fsSupported ? (
             <>
