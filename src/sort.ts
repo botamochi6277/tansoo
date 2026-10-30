@@ -1,4 +1,6 @@
 import { categoryOf } from './clothTypes';
+import { effectiveFormality } from './formality';
+import { effectiveSeasons, encodeSeasons } from './season';
 import type { ClothItem } from './types';
 
 export type SortKey = Exclude<keyof ClothItem, 'id'> | 'category';
@@ -12,10 +14,13 @@ export const SORT_COLUMNS: { key: SortKey; label: string; numeric?: boolean }[] 
   { key: 'type', label: 'Type' },
   { key: 'color', label: 'Color' },
   { key: 'size', label: 'Size' },
+  { key: 'formality', label: 'Formality' },
+  { key: 'seasons', label: 'Season' },
   { key: 'cost', label: 'Cost (¥)', numeric: true },
 ];
 
-const valueOf = (it: ClothItem, k: SortKey) => (k === 'category' ? categoryOf(it.type) : it[k]);
+const valueOf = (it: ClothItem, k: SortKey) =>
+  k === 'category' ? categoryOf(it.type) : k === 'formality' ? effectiveFormality(it) : k === 'seasons' ? encodeSeasons(effectiveSeasons(it)) : it[k];
 
 export function sortItems(items: ClothItem[], key: SortKey, dir: SortDir): ClothItem[] {
   const sign = dir === 'asc' ? 1 : -1;

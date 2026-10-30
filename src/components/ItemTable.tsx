@@ -18,7 +18,10 @@ import TypeIcon from './TypeIcon';
 import { swatchFor } from '../colors';
 import { SORT_COLUMNS, type SortDir, type SortKey } from '../sort';
 import ItemThumb from './ItemThumb';
+import { effectiveSeasons } from '../season';
+import { useSeasonsLabel } from '../seasonLabel';
 import { useI18n, type Key } from '../i18n';
+import { effectiveFormality, formalityKey, signed } from '../formality';
 import type { ClothItem } from '../types';
 
 interface Props {
@@ -33,6 +36,7 @@ interface Props {
 
 export default function ItemTable({ items, sortKey, dir, onSort, onEdit, onDelete }: Props) {
   const { t, typeLabel, categoryLabel, colorLabel } = useI18n();
+  const seasonsLabel = useSeasonsLabel();
   return (
     <TableContainer component={Paper}>
       <Table size="small">
@@ -76,6 +80,8 @@ export default function ItemTable({ items, sortKey, dir, onSort, onEdit, onDelet
                 {colorLabel(it.color)}
               </TableCell>
               <TableCell>{it.size}</TableCell>
+              <TableCell>{seasonsLabel(effectiveSeasons(it))}</TableCell>
+              <TableCell>{signed(effectiveFormality(it))} {t(formalityKey(effectiveFormality(it)))}</TableCell>
               <TableCell align="right">{it.cost.toLocaleString()}</TableCell>
               <TableCell align="right">
                 <IconButton size="small" aria-label={t('common.edit')} onClick={() => onEdit(it)}><EditIcon fontSize="small" /></IconButton>
@@ -85,7 +91,7 @@ export default function ItemTable({ items, sortKey, dir, onSort, onEdit, onDelet
           ))}
           {items.length === 0 && (
             <TableRow>
-              <TableCell colSpan={10} align="center">{t('list.empty')}</TableCell>
+              <TableCell colSpan={12} align="center">{t('list.empty')}</TableCell>
             </TableRow>
           )}
         </TableBody>

@@ -1,11 +1,12 @@
 /** Category is derived from the type, never stored. */
 export const CATEGORIES: { name: string; types: string[] }[] = [
   { name: 'Outerwear', types: ['Jacket', 'Coat', 'Hoodie'] },
-  { name: 'Tops', types: ['T-shirt', 'Long T-shirt', 'Shirt', 'Sweater'] },
-  { name: 'Bottoms', types: ['Short pants', 'Long pants', 'Skirt'] },
-  { name: 'Innerwear', types: ['Underwear', 'Socks'] },
-  { name: 'Accessories', types: ['Hat', 'Bag', 'Shoes'] },
-  { name: 'Other', types: ['One-piece', 'Other'] },
+  { name: 'Tops', types: ['T-shirt', 'Long T-shirt', 'Polo shirt', 'Shirt', 'Sweatshirt', 'Knit'] },
+  { name: 'Bottoms', types: ['Short pants', 'Long pants', 'Jeans', 'Slacks', 'Sweatpants', 'Skirt'] },
+  { name: 'Innerwear', types: ['Underwear', 'Socks', 'Loungewear'] },
+  { name: 'Accessories', types: ['Hat', 'Scarf', 'Gloves', 'Eyewear', 'Bag', 'Shoes'] },
+  { name: 'Sets', types: ['Suit', 'One-piece'] },
+  { name: 'Other', types: ['Other'] },
 ];
 
 export const CLOTH_TYPES = CATEGORIES.flatMap((c) => c.types);
@@ -18,17 +19,25 @@ export const categoryOf = (type: string): string =>
 const ICONS: Record<string, string> = {
   'T-shirt': 'fb-t-shirt',
   'Long T-shirt': 'fb-t-shirt-long',
+  'Polo shirt': 'fb-shirt',
   Shirt: 'fb-shirt',
-  Sweater: 'fb-sweater',
+  Sweatshirt: 'fb-sweater',
+  Sweater: 'fb-sweater', // no longer offered; kept so old items still show an icon
+  Knit: 'fb-sweater',
   Hoodie: 'fb-hoodie',
   Jacket: 'fb-jacket',
   Coat: 'fb-coat',
   'Short pants': 'fb-tranks',
   'Long pants': 'fb-pants',
+  Jeans: 'fb-pants',
+  Slacks: 'fb-pants',
+  Sweatpants: 'fb-pants',
   Skirt: 'fb-skirt',
   Socks: 'fb-socks',
   Underwear: 'fb-panty',
   Bag: 'fb-backpack',
+  Scarf: 'fb-scarf',
+  Gloves: 'fb-glove',
 };
 
 export const typeIcon = (type: string): string => ICONS[type] ?? 'fb-hanger';

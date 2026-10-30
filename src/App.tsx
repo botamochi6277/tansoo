@@ -20,6 +20,7 @@ import type { ClothItem, NewClothItem } from './types';
 import ItemForm from './components/ItemForm';
 import AiImportDialog from './components/AiImportDialog';
 import ItemList from './components/ItemList';
+import { NO_FILTERS, type Filters } from './filter';
 import Stats from './components/Stats';
 
 const REPO_URL = 'https://github.com/botamochi6277/tansoo';
@@ -56,6 +57,7 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [items, setItems] = useState<ClothItem[]>([]);
   const [tab, setTab] = useState(0);
+  const [filters, setFilters] = useState<Filters>(NO_FILTERS);
   const [formOpen, setFormOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [editing, setEditing] = useState<ClothItem | null>(null);
@@ -182,22 +184,31 @@ export default function App() {
     }
   };
 
+  // Run a database change; on failure keep the dialog open and say why instead of failing silently.
+  const attempt = (action: () => void): boolean => {
+    try {
+      action();
+      refresh();
+      return true;
+    } catch (e) {
+      console.error(e);
+      window.alert(t('err.save', { message: e instanceof Error ? e.message : String(e) }));
+      return false;
+    }
+  };
+
   const submit = (item: NewClothItem, id?: number) => {
-    if (id === undefined) db.addItem(item);
-    else db.updateItem({ ...item, id });
-    refresh();
-    setFormOpen(false);
+    const saved = attempt(() => (id === undefined ? db.addItem(item) : db.updateItem({ ...item, id })));
+    if (saved) setFormOpen(false);
   };
 
   const addMany = (list: NewClothItem[]) => {
-    list.forEach(db.addItem);
-    refresh();
+    attempt(() => list.forEach((item) => db.addItem(item)));
   };
 
   const remove = (item: ClothItem) => {
     if (!window.confirm(t('confirm.delete', { name: item.name }))) return;
-    db.deleteItem(item.id);
-    refresh();
+    attempt(() => db.deleteItem(item.id));
   };
 
   const exportFile = () => {
@@ -276,6 +287,7 @@ export default function App() {
         </Toolbar>
       </AppBar>
       <Container sx={{ py: 3, flex: 1 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t('app.about')}</Typography>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
           <Tab label={t('tab.items')} />
           <Tab label={t('tab.stats')} />
@@ -304,10 +316,16 @@ export default function App() {
                 {t('btn.ai')}
               </Button>
             </Stack>
-            <ItemList items={items} onEdit={(i) => { setEditing(i); setFormOpen(true); }} onDelete={remove} />
+            <ItemList items={items} filters={filters} onFiltersChange={setFilters} onEdit={(i) => { setEditing(i); setFormOpen(true); }} onDelete={remove} />
           </>
         ) : (
-          <Stats items={items} />
+          <Stats
+            items={items}
+            onShowItems={(f) => {
+              setFilters({ ...NO_FILTERS, ...f });
+              setTab(0);
+            }}
+          />
         )}
       </Container>
       <Box component="footer" sx={{ py: 2, textAlign: 'center', borderTop: 1, borderColor: 'divider' }}>

@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Tooltip, Typography } from '@mui/material';
+import { Box, ButtonBase, Card, CardContent, Tooltip, Typography } from '@mui/material';
 import { CATEGORIES, categoryOf } from '../clothTypes';
 import { COLORS, swatchFor } from '../colors';
 import { useI18n } from '../i18n';
@@ -29,7 +29,7 @@ const fill = (color: string) => swatchFor(color) ?? 'repeating-linear-gradient(4
 const BAR_HEIGHT = 22;
 const LABEL_SPACE = 12; // % of the track kept free for the value at the bar tip
 
-export default function ColorByCategory({ items }: { items: ClothItem[] }) {
+export default function ColorByCategory({ items, onShowItems }: { items: ClothItem[]; onShowItems: (category: string, color: string) => void }) {
   const { t, count, categoryLabel, colorLabel } = useI18n();
   const colorName = (c: string) => (c === UNSPECIFIED ? t('stats.unspecified') : colorLabel(c));
   const { rows, order } = tally(items);
@@ -60,23 +60,29 @@ export default function ColorByCategory({ items }: { items: ClothItem[] }) {
                     .map((c, i, present) => {
                       const n = r.counts.get(c)!;
                       const last = i === present.length - 1;
-                      return (
-                        <Tooltip key={c} arrow title={`${categoryLabel(r.category)} · ${colorName(c)}: ${count(n)}`}>
-                          <Box
-                            tabIndex={0}
-                            role="img"
-                            aria-label={`${categoryLabel(r.category)}, ${colorName(c)}: ${count(n)}`}
-                            sx={{
-                              flex: n,
-                              minWidth: 4,
-                              height: BAR_HEIGHT,
-                              background: fill(c),
-                              border: 1,
-                              borderColor: 'divider',
-                              // 4px rounded data end, square at the baseline
-                              borderRadius: last ? '0 4px 4px 0' : 0,
-                              '&:focus-visible': { outline: 2, outlineColor: 'primary.main', outlineOffset: 1 },
-                            }}
+                      const label = `${categoryLabel(r.category)} · ${colorName(c)}: ${count(n)}`;
+                      const sx = {
+                        flex: n,
+                        minWidth: 4,
+                        height: BAR_HEIGHT,
+                        background: fill(c),
+                        border: 1,
+                        borderColor: 'divider',
+                        // 4px rounded data end, square at the baseline
+                        borderRadius: last ? '0 4px 4px 0' : 0,
+                        '&:focus-visible': { outline: 2, outlineColor: 'primary.main', outlineOffset: 1 },
+                      } as const;
+                      // "Unspecified" mixes several unknown colors, so it has no single filter to link to
+                      return c === UNSPECIFIED ? (
+                        <Tooltip key={c} arrow title={label}>
+                          <Box tabIndex={0} role="img" aria-label={label} sx={sx} />
+                        </Tooltip>
+                      ) : (
+                        <Tooltip key={c} arrow title={`${label} — ${t('stats.showItems')}`}>
+                          <ButtonBase
+                            aria-label={`${label}. ${t('stats.showItems')}`}
+                            onClick={() => onShowItems(r.category, c)}
+                            sx={{ ...sx, cursor: 'pointer', '&:hover': { outline: 2, outlineColor: 'text.primary', outlineOffset: -2 } }}
                           />
                         </Tooltip>
                       );

@@ -11,6 +11,10 @@ import {
   FormControlLabel,
   FormLabel,
   Radio,
+  Slider,
+  Switch,
+  ToggleButton,
+  ToggleButtonGroup,
   RadioGroup,
   Stack,
   TextField,
@@ -20,6 +24,9 @@ import { fileToThumbnail } from '../image';
 import { CATEGORIES, CLOTH_TYPES } from '../clothTypes';
 import TypeIcon from './TypeIcon';
 import { useI18n } from '../i18n';
+import { autoSeasons, SEASONS, seasonKey, sortSeasons, type Season } from '../season';
+import { useSeasonsLabel } from '../seasonLabel';
+import { autoFormality, FORMALITY_LEVELS, formalityKey, signed } from '../formality';
 import { COLORS } from '../colors';
 import type { ClothItem, NewClothItem } from '../types';
 
@@ -39,6 +46,8 @@ const empty = (): NewClothItem => ({
   color: '',
   cost: 0,
   size: '',
+  formality: null,
+  seasons: null,
   image: '',
   url: '',
 });
@@ -58,6 +67,12 @@ export default function ItemForm({ open, initial, brands, onClose, onSubmit }: P
 
   const set = <K extends keyof NewClothItem>(k: K, v: NewClothItem[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  // shown value: the entered score, or the one computed from the chosen type and color
+  const formality = form.formality ?? autoFormality(form.type, form.color);
+
+  const seasons = form.seasons ?? autoSeasons(form.type);
+  const seasonsLabel = useSeasonsLabel();
 
   const valid = form.name.trim() !== '' && form.purchasedDate !== '' && form.cost >= 0;
 
@@ -112,6 +127,58 @@ export default function ItemForm({ open, initial, brands, onClose, onSubmit }: P
                 );
               })}
             </Box>
+          </Box>
+          <Box sx={{ px: 1.5 }}>
+            <Typography variant="body2" color="text.secondary">
+              {t('col.formality')}: {signed(formality)} · {t(formalityKey(formality))}
+              {form.formality === null && ` (${t('form.auto')})`}
+            </Typography>
+            <Slider
+              min={-2}
+              max={2}
+              step={1}
+              value={formality}
+              disabled={form.formality === null}
+              marks={FORMALITY_LEVELS.map((n) => ({ value: n, label: signed(n) }))}
+              onChange={(_, v) => set('formality', v as number)}
+              aria-label={t('col.formality')}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  size="small"
+                  checked={form.formality === null}
+                  onChange={(e) => set('formality', e.target.checked ? null : formality)}
+                />
+              }
+              label={t('form.formalityAuto')}
+            />
+          </Box>
+          <Box sx={{ px: 1.5 }}>
+            <Typography variant="body2" color="text.secondary">
+              {t('col.seasons')}: {seasonsLabel(seasons)}
+              {form.seasons === null && ` (${t('form.auto')})`}
+            </Typography>
+            <ToggleButtonGroup
+              fullWidth
+              size="small"
+              value={seasons}
+              disabled={form.seasons === null}
+              onChange={(_, v: Season[]) => v.length > 0 && set('seasons', sortSeasons(v))} // keep at least one
+              sx={{ my: 0.5 }}
+            >
+              {SEASONS.map((s) => <ToggleButton key={s} value={s}>{t(seasonKey(s))}</ToggleButton>)}
+            </ToggleButtonGroup>
+            <FormControlLabel
+              control={
+                <Switch
+                  size="small"
+                  checked={form.seasons === null}
+                  onChange={(e) => set('seasons', e.target.checked ? null : seasons)}
+                />
+              }
+              label={t('form.seasonsAuto')}
+            />
           </Box>
           <TextField
             label={t('form.size')}
