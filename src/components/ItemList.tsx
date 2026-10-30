@@ -10,6 +10,7 @@ import { effectiveFormality, FORMALITY_LEVELS, formalityKey, signed } from '../f
 import { filterItems, isFiltering, NO_FILTERS, type Filters } from '../filter';
 import { SORT_COLUMNS, sortItems, type SortDir, type SortKey } from '../sort';
 import { useI18n, type Key } from '../i18n';
+import { currentSeason, SEASONS, seasonKey, type Season } from '../season';
 import ItemCards from './ItemCards';
 import ItemTable from './ItemTable';
 import type { ClothItem } from '../types';
@@ -36,6 +37,7 @@ interface Props {
 /** Items as a table or as compact cards, sharing one sort order. */
 export default function ItemList({ items, filters, onFiltersChange: setFilters, onEdit, onDelete }: Props) {
   const { t, categoryLabel, colorLabel } = useI18n();
+  const now = currentSeason();
   const [view, setView] = useState<View>(savedView);
   const [sortKey, setSortKey] = useState<SortKey>('purchasedDate');
   const [dir, setDir] = useState<SortDir>('desc');
@@ -57,7 +59,7 @@ export default function ItemList({ items, filters, onFiltersChange: setFilters, 
   const shown = useMemo(() => filterItems(items, filters), [items, filters]);
   const sorted = useMemo(() => sortItems(shown, sortKey, dir), [shown, sortKey, dir]);
 
-  const multi = (label: string, key: 'categories' | 'colors' | 'brands' | 'formalities', values: string[], show: (v: string) => string) => (
+  const multi = (label: string, key: 'categories' | 'colors' | 'brands' | 'formalities' | 'seasons', values: string[], show: (v: string) => string) => (
     <TextField
       select
       size="small"
@@ -119,6 +121,14 @@ export default function ItemList({ items, filters, onFiltersChange: setFilters, 
         {multi(t('col.category'), 'categories', options.categories, categoryLabel)}
         {multi(t('col.color'), 'colors', options.colors, colorLabel)}
         {multi(t('col.formality'), 'formalities', options.formalities, (v) => `${signed(Number(v))} ${t(formalityKey(Number(v)))}`)}
+        {multi(t('col.seasons'), 'seasons', [...SEASONS], (v) => t(seasonKey(v as Season)))}
+        <Button
+          size="small"
+          variant={filters.seasons.length === 1 && filters.seasons[0] === now ? 'contained' : 'outlined'}
+          onClick={() => setFilters({ ...filters, seasons: filters.seasons.length === 1 && filters.seasons[0] === now ? [] : [now] })}
+        >
+          {t('list.nowSeason', { season: t(seasonKey(now)) })}
+        </Button>
         {multi(t('col.brand'), 'brands', options.brands, (v) => v)}
         {isFiltering(filters) && (
           <>

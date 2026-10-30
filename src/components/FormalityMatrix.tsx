@@ -1,15 +1,23 @@
-import { Box, ButtonBase, Card, CardContent, Tooltip, Typography, useTheme } from '@mui/material';
+import { useState } from 'react';
+import { Box, ButtonBase, Card, CardContent, ToggleButton, ToggleButtonGroup, Tooltip, Typography, useTheme } from '@mui/material';
 import { CATEGORIES, categoryOf } from '../clothTypes';
 import { effectiveFormality, FORMALITY_LEVELS, formalityKey, signed } from '../formality';
 import { useI18n } from '../i18n';
+import { effectiveSeasons, SEASONS, seasonKey, type Season } from '../season';
 import type { ClothItem } from '../types';
 
 const MIN_SHADE = 0.14; // lightest fill for a cell that has items
 
 /** Heat-map of item counts: categories down, formality across. One hue, light to dark. */
-export default function FormalityMatrix({ items, onShowItems }: { items: ClothItem[]; onShowItems: (category: string, formality: number) => void }) {
+type SeasonChoice = Season | 'all';
+
+export default function FormalityMatrix({ items: allItems, onShowItems }: { items: ClothItem[]; onShowItems: (category: string, formality: number, season: Season | null) => void }) {
   const { t, count, categoryLabel } = useI18n();
   const theme = useTheme();
+  const [season, setSeason] = useState<SeasonChoice>('all');
+
+  // only the items worn in the chosen season
+  const items = season === 'all' ? allItems : allItems.filter((it) => effectiveSeasons(it).includes(season));
 
   const counts = new Map<string, number>();
   for (const it of items) {
@@ -17,7 +25,7 @@ export default function FormalityMatrix({ items, onShowItems }: { items: ClothIt
     counts.set(k, (counts.get(k) ?? 0) + 1);
   }
   const rows = CATEGORIES.map((c) => c.name).filter((c) => FORMALITY_LEVELS.some((f) => counts.has(`${c}|${f}`)));
-  const max = Math.max(...counts.values());
+  const max = Math.max(1, ...counts.values());
 
   const shade = (n: number) => MIN_SHADE + (1 - MIN_SHADE) * (n / max);
 
@@ -25,6 +33,20 @@ export default function FormalityMatrix({ items, onShowItems }: { items: ClothIt
     <Card>
       <CardContent>
         <Typography variant="h6" gutterBottom>{t('stats.formalityMatrix')}</Typography>
+
+        <ToggleButtonGroup
+          exclusive
+          size="small"
+          value={season}
+          onChange={(_, v: SeasonChoice | null) => v && setSeason(v)}
+          aria-label={t('col.seasons')}
+          sx={{ mb: 2 }}
+        >
+          <ToggleButton value="all">{t('stats.allSeasons')}</ToggleButton>
+          {SEASONS.map((s) => <ToggleButton key={s} value={s}>{t(seasonKey(s))}</ToggleButton>)}
+        </ToggleButtonGroup>
+
+        {rows.length === 0 && <Typography color="text.secondary">{t('stats.noItemsSeason')}</Typography>}
 
         <Box
           sx={{
@@ -71,7 +93,7 @@ export default function FormalityMatrix({ items, onShowItems }: { items: ClothIt
                   <Tooltip key={f} arrow title={`${label} — ${t('stats.showItems')}`}>
                     <ButtonBase
                       aria-label={`${label}. ${t('stats.showItems')}`}
-                      onClick={() => onShowItems(cat, f)}
+                      onClick={() => onShowItems(cat, f, season === 'all' ? null : season)}
                       sx={{ ...sx, cursor: 'pointer', '&:hover': { outline: 2, outlineColor: 'text.primary', outlineOffset: -2 } }}
                     >
                       {n}

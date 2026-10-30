@@ -4,6 +4,7 @@ import FormalityMatrix from './FormalityMatrix';
 import { categoryOf } from '../clothTypes';
 import { useI18n } from '../i18n';
 import type { Filters } from '../filter';
+import { effectiveSeasons, SEASONS, seasonKey, type Season } from '../season';
 import { effectiveFormality, formalityKey, signed } from '../formality';
 import type { ClothItem } from '../types';
 
@@ -62,7 +63,7 @@ export default function Stats({ items, onShowItems }: { items: ClothItem[]; onSh
         </CardContent></Card>
       </Stack>
       <ColorByCategory items={items} onShowItems={(category, color) => onShowItems({ categories: [category], colors: [color] })} />
-      <FormalityMatrix items={items} onShowItems={(category, f) => onShowItems({ categories: [category], formalities: [String(f)] })} />
+      <FormalityMatrix items={items} onShowItems={(category, f, season) => onShowItems({ categories: [category], formalities: [String(f)], seasons: season ? [season] : [] })} />
       <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: "wrap" }}>
         <Breakdown title={t('stats.byBrand')} rows={groupBy(items, 'brand')} total={items.length} show={orNone((k) => k)} />
         <Breakdown title={t('stats.byCategory')} rows={groupBy(items, 'category')} total={items.length} show={orNone(categoryLabel)} />
@@ -73,6 +74,15 @@ export default function Stats({ items, onShowItems }: { items: ClothItem[]; onSh
           rows={groupBy(items, 'formality').sort((a, b) => Number(a[0]) - Number(b[0]))}
           total={items.length}
           show={(k) => `${signed(Number(k))} ${t(formalityKey(Number(k)))}`}
+        />
+        <Breakdown
+          title={t('stats.bySeason')}
+          rows={SEASONS.map((s) => {
+            const worn = items.filter((it) => effectiveSeasons(it).includes(s));
+            return [s, { count: worn.length, cost: worn.reduce((sum, it) => sum + it.cost, 0) }] as [string, { count: number; cost: number }];
+          })}
+          total={items.length}
+          show={(k) => t(seasonKey(k as Season))}
         />
       </Stack>
     </Stack>

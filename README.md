@@ -10,8 +10,8 @@ A user can
 
 1. register, edit, and delete cloth items, or add many at once from an order history page with [your AI](#add-by-your-ai)
 1. browse the items as compact cards (default) or as a table, sorted by any column
-1. filter the items by free-text search, category, color, formality, and brand
-1. analyze stats (item count, total/average cost, a stacked bar chart of colors by category and a matrix of formality by category (the bar segments and matrix cells link to the matching items), and breakdowns by brand, category, type, color, and formality)
+1. filter the items by free-text search, category, color, formality, season (with a one-click "this season" filter), and brand
+1. analyze stats (item count, total/average cost, a stacked bar chart of colors by category and a matrix of formality by category that can be switched by season (the bar segments and matrix cells link to the matching items), and breakdowns by brand, category, type, color, formality, and season)
 1. switch between light and dark mode (follows the system setting by default)
 1. switch the display language between English and Japanese (follows the browser language by default; type, category, and color names are translated for display only, the stored data stays language independent)
 1. keep the data in a `.sqlite` file, or export/import it
@@ -37,6 +37,7 @@ A user can
 - color, chosen from a fixed palette
 - size (optional, e.g. M, 30, 26.5)
 - formality, a score from -2 (more casual) to 2 (more formal); calculated from the type and color unless you enter it. See [Formality and casualness](#formality-and-casualness)
+- seasons, the seasons the item is worn in (spring, summer, autumn, winter); taken from the type unless you choose them. See [Seasons](#seasons)
 - cost (yen)
 - image (optional)
 - url (optional, e.g. a product page)
@@ -79,6 +80,12 @@ formality score:
 | more casual | casual | neutral | formal | more formal |
 
 In the app, each item has this score (set with a slider in the item form, shown in both views, sortable, and counted in the stats and the formality matrix). If you do not enter one, the score is calculated automatically as the type's score plus the color's score, kept within -2 to 2. For example, Slacks (+1) in Black (+1) gives +2, and a T-shirt (-2) in Black (+1) gives -1. Dark, quiet colors (Black, Navy) add +1 and loud ones (Yellow, Orange, Pink, Red) subtract 1; the scores per type and color are in `src/formality.ts`. When you add items by your AI, the AI may give a score too; if it does not, the automatic one is used.
+
+## Seasons
+
+Japan has four seasons, and what you wear changes with them. Each item has the seasons it is worn in. If you do not choose them, they come from the type: for example a T-shirt is for spring, summer, and autumn, a coat for autumn and winter, short pants for summer only, and underwear or socks for all year. The seasons per type are in `src/season.ts`. In the item form, turn off "Choose automatically from type" to pick them yourself (at least one).
+
+The Items tab has a Season filter, and a "This season" button that filters to the current season (spring is March to May, summer June to August, autumn September to November, winter December to February), which is handy when swapping clothes. The Stats tab shows how many items you have for each season; an item counts once for every season it covers. When you add items by your AI, the AI may give the seasons too (for example a Heattech item for autumn and winter); if it does not, the type's seasons are used.
 
 ## Where the data is stored
 

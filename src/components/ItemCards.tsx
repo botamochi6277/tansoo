@@ -5,6 +5,8 @@ import ItemThumb from './ItemThumb';
 import TypeIcon from './TypeIcon';
 import { swatchFor } from '../colors';
 import { useI18n } from '../i18n';
+import { effectiveSeasons } from '../season';
+import { useSeasonsLabel } from '../seasonLabel';
 import { effectiveFormality, formalityKey, signed } from '../formality';
 import type { ClothItem } from '../types';
 
@@ -16,6 +18,7 @@ interface Props {
 
 export default function ItemCards({ items, onEdit, onDelete }: Props) {
   const { t, typeLabel, colorLabel } = useI18n();
+  const seasonsLabel = useSeasonsLabel();
   if (items.length === 0) {
     return <Typography align="center">{t('list.empty')}</Typography>;
   }
@@ -44,7 +47,7 @@ export default function ItemCards({ items, onEdit, onDelete }: Props) {
             {[it.color && colorLabel(it.color), it.size].filter(Boolean).join(' · ')}
           </Typography>
           <Typography variant="caption" color="text.secondary" noWrap>
-            {t('col.formality')}: {signed(effectiveFormality(it))} {t(formalityKey(effectiveFormality(it)))}
+            {t('col.formality')}: {signed(effectiveFormality(it))} {t(formalityKey(effectiveFormality(it)))} · {seasonsLabel(effectiveSeasons(it))}
           </Typography>
           <Typography variant="caption" color="text.secondary" noWrap>
             {[it.brand, it.purchasedDate].filter(Boolean).join(' · ')}

@@ -1,5 +1,6 @@
 import { categoryOf } from './clothTypes';
 import { effectiveFormality } from './formality';
+import { effectiveSeasons } from './season';
 import type { ClothItem } from './types';
 
 export interface Filters {
@@ -9,12 +10,14 @@ export interface Filters {
   brands: string[];
   /** formality scores as strings, e.g. "-2", "1" */
   formalities: string[];
+  /** matches items worn in any of these seasons */
+  seasons: string[];
 }
 
-export const NO_FILTERS: Filters = { text: '', categories: [], colors: [], brands: [], formalities: [] };
+export const NO_FILTERS: Filters = { text: '', categories: [], colors: [], brands: [], formalities: [], seasons: [] };
 
 export const isFiltering = (f: Filters): boolean =>
-  f.text.trim() !== '' || f.categories.length > 0 || f.colors.length > 0 || f.brands.length > 0 || f.formalities.length > 0;
+  f.text.trim() !== '' || f.categories.length > 0 || f.colors.length > 0 || f.brands.length > 0 || f.formalities.length > 0 || f.seasons.length > 0;
 
 /** An empty list means "any"; selected values within one list are OR-ed, lists are AND-ed. */
 export function filterItems(items: ClothItem[], f: Filters): ClothItem[] {
@@ -24,6 +27,7 @@ export function filterItems(items: ClothItem[], f: Filters): ClothItem[] {
     if (f.colors.length && !f.colors.includes(it.color)) return false;
     if (f.brands.length && !f.brands.includes(it.brand)) return false;
     if (f.formalities.length && !f.formalities.includes(String(effectiveFormality(it)))) return false;
+    if (f.seasons.length && !effectiveSeasons(it).some((x) => f.seasons.includes(x))) return false;
     if (q) {
       const hay = [it.name, it.brand, it.type, it.color, it.size].join(' ').toLowerCase();
       if (!hay.includes(q)) return false;

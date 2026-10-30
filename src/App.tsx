@@ -184,22 +184,31 @@ export default function App() {
     }
   };
 
+  // Run a database change; on failure keep the dialog open and say why instead of failing silently.
+  const attempt = (action: () => void): boolean => {
+    try {
+      action();
+      refresh();
+      return true;
+    } catch (e) {
+      console.error(e);
+      window.alert(t('err.save', { message: e instanceof Error ? e.message : String(e) }));
+      return false;
+    }
+  };
+
   const submit = (item: NewClothItem, id?: number) => {
-    if (id === undefined) db.addItem(item);
-    else db.updateItem({ ...item, id });
-    refresh();
-    setFormOpen(false);
+    const saved = attempt(() => (id === undefined ? db.addItem(item) : db.updateItem({ ...item, id })));
+    if (saved) setFormOpen(false);
   };
 
   const addMany = (list: NewClothItem[]) => {
-    list.forEach(db.addItem);
-    refresh();
+    attempt(() => list.forEach((item) => db.addItem(item)));
   };
 
   const remove = (item: ClothItem) => {
     if (!window.confirm(t('confirm.delete', { name: item.name }))) return;
-    db.deleteItem(item.id);
-    refresh();
+    attempt(() => db.deleteItem(item.id));
   };
 
   const exportFile = () => {
