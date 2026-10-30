@@ -4,6 +4,7 @@ export type Lang = 'en' | 'ja';
 
 const en = {
   'app.loading': 'Loading…',
+  'app.about': 'Tansoo is a closet organizer. Register your clothes, filter them by season, color, and formality, and see your wardrobe in stats. Everything stays in your browser; no server is involved.',
   'tab.items': 'Items',
   'tab.stats': 'Stats',
   'btn.add': 'Add new item',
@@ -121,6 +122,7 @@ export type Key = keyof typeof en;
 
 const ja: Record<Key, string> = {
   'app.loading': '読み込み中…',
+  'app.about': 'Tansoo（タンスー）は服の整理アプリです。持っている服を登録し、季節・色・フォーマル度で絞り込んだり、統計でワードローブを眺めたりできます。データはブラウザ内だけに保存され、サーバーには送信されません。',
   'tab.items': 'アイテム',
   'tab.stats': '統計',
   'btn.add': '新しいアイテムを追加',

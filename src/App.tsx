@@ -287,6 +287,7 @@ export default function App() {
         </Toolbar>
       </AppBar>
       <Container sx={{ py: 3, flex: 1 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{t('app.about')}</Typography>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
           <Tab label={t('tab.items')} />
           <Tab label={t('tab.stats')} />
