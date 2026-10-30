@@ -1,4 +1,4 @@
-import { Box, Card, CardContent, Tooltip, Typography, useTheme } from '@mui/material';
+import { Box, ButtonBase, Card, CardContent, Tooltip, Typography, useTheme } from '@mui/material';
 import { CATEGORIES, categoryOf } from '../clothTypes';
 import { effectiveFormality, FORMALITY_LEVELS, formalityKey, signed } from '../formality';
 import { useI18n } from '../i18n';
@@ -7,7 +7,7 @@ import type { ClothItem } from '../types';
 const MIN_SHADE = 0.14; // lightest fill for a cell that has items
 
 /** Heat-map of item counts: categories down, formality across. One hue, light to dark. */
-export default function FormalityMatrix({ items }: { items: ClothItem[] }) {
+export default function FormalityMatrix({ items, onShowItems }: { items: ClothItem[]; onShowItems: (category: string, formality: number) => void }) {
   const { t, count, categoryLabel } = useI18n();
   const theme = useTheme();
 
@@ -51,29 +51,35 @@ export default function FormalityMatrix({ items }: { items: ClothItem[] }) {
                 const n = counts.get(`${cat}|${f}`) ?? 0;
                 const label = `${categoryLabel(cat)} · ${signed(f)} ${t(formalityKey(f))}: ${count(n)}`;
                 const dark = n > 0 && shade(n) > 0.55; // text flips once the fill is dark enough
-                return (
-                  <Tooltip key={f} arrow title={label}>
-                    <Box
-                      tabIndex={0}
-                      role="img"
-                      aria-label={label}
-                      sx={{
-                        minHeight: 40,
-                        borderRadius: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        // one hue: the theme's primary, mixed into the surface by count
-                        bgcolor: n > 0
-                          ? `color-mix(in srgb, ${theme.palette.primary.main} ${Math.round(shade(n) * 100)}%, ${theme.palette.background.paper})`
-                          : 'action.hover',
-                        color: dark ? 'primary.contrastText' : 'text.primary',
-                        fontWeight: 600,
-                        '&:focus-visible': { outline: 2, outlineColor: 'primary.main', outlineOffset: 1 },
-                      }}
+                const sx = {
+                  minHeight: 40,
+                  borderRadius: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  // one hue: the theme's primary, mixed into the surface by count
+                  bgcolor: n > 0
+                    ? `color-mix(in srgb, ${theme.palette.primary.main} ${Math.round(shade(n) * 100)}%, ${theme.palette.background.paper})`
+                    : 'action.hover',
+                  color: dark ? 'primary.contrastText' : 'text.primary',
+                  fontWeight: 600,
+                  fontSize: 'inherit',
+                  '&:focus-visible': { outline: 2, outlineColor: 'primary.main', outlineOffset: 1 },
+                } as const;
+                // cells with items are buttons that open the Items tab filtered to them
+                return n > 0 ? (
+                  <Tooltip key={f} arrow title={`${label} — ${t('stats.showItems')}`}>
+                    <ButtonBase
+                      aria-label={`${label}. ${t('stats.showItems')}`}
+                      onClick={() => onShowItems(cat, f)}
+                      sx={{ ...sx, cursor: 'pointer', '&:hover': { outline: 2, outlineColor: 'text.primary', outlineOffset: -2 } }}
                     >
-                      {n > 0 ? n : ''}
-                    </Box>
+                      {n}
+                    </ButtonBase>
+                  </Tooltip>
+                ) : (
+                  <Tooltip key={f} arrow title={label}>
+                    <Box tabIndex={0} role="img" aria-label={label} sx={sx} />
                   </Tooltip>
                 );
               })}

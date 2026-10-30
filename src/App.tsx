@@ -20,6 +20,7 @@ import type { ClothItem, NewClothItem } from './types';
 import ItemForm from './components/ItemForm';
 import AiImportDialog from './components/AiImportDialog';
 import ItemList from './components/ItemList';
+import { NO_FILTERS, type Filters } from './filter';
 import Stats from './components/Stats';
 
 const REPO_URL = 'https://github.com/botamochi6277/tansoo';
@@ -56,6 +57,7 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [items, setItems] = useState<ClothItem[]>([]);
   const [tab, setTab] = useState(0);
+  const [filters, setFilters] = useState<Filters>(NO_FILTERS);
   const [formOpen, setFormOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [editing, setEditing] = useState<ClothItem | null>(null);
@@ -304,10 +306,16 @@ export default function App() {
                 {t('btn.ai')}
               </Button>
             </Stack>
-            <ItemList items={items} onEdit={(i) => { setEditing(i); setFormOpen(true); }} onDelete={remove} />
+            <ItemList items={items} filters={filters} onFiltersChange={setFilters} onEdit={(i) => { setEditing(i); setFormOpen(true); }} onDelete={remove} />
           </>
         ) : (
-          <Stats items={items} />
+          <Stats
+            items={items}
+            onShowItems={(f) => {
+              setFilters({ ...NO_FILTERS, ...f });
+              setTab(0);
+            }}
+          />
         )}
       </Container>
       <Box component="footer" sx={{ py: 2, textAlign: 'center', borderTop: 1, borderColor: 'divider' }}>

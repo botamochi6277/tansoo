@@ -3,6 +3,7 @@ import ColorByCategory from './ColorByCategory';
 import FormalityMatrix from './FormalityMatrix';
 import { categoryOf } from '../clothTypes';
 import { useI18n } from '../i18n';
+import type { Filters } from '../filter';
 import { effectiveFormality, formalityKey, signed } from '../formality';
 import type { ClothItem } from '../types';
 
@@ -39,7 +40,7 @@ function Breakdown({ title, rows, total, show }: { title: string; rows: [string,
   );
 }
 
-export default function Stats({ items }: { items: ClothItem[] }) {
+export default function Stats({ items, onShowItems }: { items: ClothItem[]; onShowItems: (filters: Partial<Filters>) => void }) {
   const { t, typeLabel, categoryLabel, colorLabel } = useI18n();
   if (items.length === 0) return <Typography>{t('stats.empty')}</Typography>;
   const orNone = (f: (k: string) => string) => (k: string) => (k === NONE ? t('common.none') : f(k));
@@ -60,8 +61,8 @@ export default function Stats({ items }: { items: ClothItem[] }) {
           <Typography variant="h4">¥{Math.round(total / items.length).toLocaleString()}</Typography>
         </CardContent></Card>
       </Stack>
-      <ColorByCategory items={items} />
-      <FormalityMatrix items={items} />
+      <ColorByCategory items={items} onShowItems={(category, color) => onShowItems({ categories: [category], colors: [color] })} />
+      <FormalityMatrix items={items} onShowItems={(category, f) => onShowItems({ categories: [category], formalities: [String(f)] })} />
       <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: "wrap" }}>
         <Breakdown title={t('stats.byBrand')} rows={groupBy(items, 'brand')} total={items.length} show={orNone((k) => k)} />
         <Breakdown title={t('stats.byCategory')} rows={groupBy(items, 'category')} total={items.length} show={orNone(categoryLabel)} />

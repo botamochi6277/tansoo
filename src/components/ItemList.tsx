@@ -6,6 +6,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { CATEGORIES, categoryOf } from '../clothTypes';
 import { COLORS } from '../colors';
+import { effectiveFormality, FORMALITY_LEVELS, formalityKey, signed } from '../formality';
 import { filterItems, isFiltering, NO_FILTERS, type Filters } from '../filter';
 import { SORT_COLUMNS, sortItems, type SortDir, type SortKey } from '../sort';
 import { useI18n, type Key } from '../i18n';
@@ -26,26 +27,29 @@ function savedView(): View {
 
 interface Props {
   items: ClothItem[];
+  filters: Filters;
+  onFiltersChange: (f: Filters) => void;
   onEdit: (item: ClothItem) => void;
   onDelete: (item: ClothItem) => void;
 }
 
 /** Items as a table or as compact cards, sharing one sort order. */
-export default function ItemList({ items, onEdit, onDelete }: Props) {
+export default function ItemList({ items, filters, onFiltersChange: setFilters, onEdit, onDelete }: Props) {
   const { t, categoryLabel, colorLabel } = useI18n();
   const [view, setView] = useState<View>(savedView);
   const [sortKey, setSortKey] = useState<SortKey>('purchasedDate');
   const [dir, setDir] = useState<SortDir>('desc');
 
-  const [filters, setFilters] = useState<Filters>(NO_FILTERS);
 
   // only offer values that exist in the closet
   const options = useMemo(() => {
     const colors = new Set(items.map((i) => i.color));
+    const scores = new Set(items.map((i) => String(effectiveFormality(i))));
     const cats = new Set(items.map((i) => categoryOf(i.type)));
     return {
       categories: CATEGORIES.map((c) => c.name).filter((c) => cats.has(c)),
       colors: [...COLORS.map((c) => c.name).filter((c) => colors.has(c)), ...[...colors].filter((c) => c && !COLORS.some((x) => x.name === c))],
+      formalities: FORMALITY_LEVELS.map(String).filter((f) => scores.has(f)),
       brands: [...new Set(items.map((i) => i.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
     };
   }, [items]);
@@ -53,7 +57,7 @@ export default function ItemList({ items, onEdit, onDelete }: Props) {
   const shown = useMemo(() => filterItems(items, filters), [items, filters]);
   const sorted = useMemo(() => sortItems(shown, sortKey, dir), [shown, sortKey, dir]);
 
-  const multi = (label: string, key: 'categories' | 'colors' | 'brands', values: string[], show: (v: string) => string) => (
+  const multi = (label: string, key: 'categories' | 'colors' | 'brands' | 'formalities', values: string[], show: (v: string) => string) => (
     <TextField
       select
       size="small"
@@ -114,6 +118,7 @@ export default function ItemList({ items, onEdit, onDelete }: Props) {
         />
         {multi(t('col.category'), 'categories', options.categories, categoryLabel)}
         {multi(t('col.color'), 'colors', options.colors, colorLabel)}
+        {multi(t('col.formality'), 'formalities', options.formalities, (v) => `${signed(Number(v))} ${t(formalityKey(Number(v)))}`)}
         {multi(t('col.brand'), 'brands', options.brands, (v) => v)}
         {isFiltering(filters) && (
           <>

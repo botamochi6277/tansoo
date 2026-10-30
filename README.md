@@ -10,8 +10,8 @@ A user can
 
 1. register, edit, and delete cloth items, or add many at once from an order history page with [your AI](#add-by-your-ai)
 1. browse the items as compact cards (default) or as a table, sorted by any column
-1. filter the items by free-text search, category, color, and brand
-1. analyze stats (item count, total/average cost, a stacked bar chart of colors by category, a matrix of formality by category, and breakdowns by brand, category, type, color, and formality)
+1. filter the items by free-text search, category, color, formality, and brand
+1. analyze stats (item count, total/average cost, a stacked bar chart of colors by category and a matrix of formality by category (the bar segments and matrix cells link to the matching items), and breakdowns by brand, category, type, color, and formality)
 1. switch between light and dark mode (follows the system setting by default)
 1. switch the display language between English and Japanese (follows the browser language by default; type, category, and color names are translated for display only, the stored data stays language independent)
 1. keep the data in a `.sqlite` file, or export/import it
