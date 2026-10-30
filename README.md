@@ -13,7 +13,7 @@ A user can
 1. filter the items by free-text search, category, color, formality, season (with a one-click "this season" filter), and brand
 1. analyze stats (item count, total/average cost, a stacked bar chart of colors by category and a matrix of formality by category that can be switched by season (the bar segments and matrix cells link to the matching items), and breakdowns by brand, category, type, color, formality, and season)
 1. switch between light and dark mode (follows the system setting by default)
-1. switch the display language between English and Japanese (follows the browser language by default; type, category, and color names are translated for display only, the stored data stays language independent)
+1. switch the display language between English and Japanese (follows the browser language by default; type, category, and color names are translated for display only, the stored data stays language independent; the short description of the app shown above the tabs is translated too)
 1. keep the data in a `.sqlite` file, or export/import it
 
 ## Cloth item properties
@@ -36,7 +36,7 @@ A user can
 
 - color, chosen from a fixed palette
 - size (optional, e.g. M, 30, 26.5)
-- formality, a score from -2 (more casual) to 2 (more formal); calculated from the type and color unless you enter it. See [Formality and casualness](#formality-and-casualness)
+- formality, a score from -2 (very casual) to 2 (very formal); calculated from the type and color unless you enter it. See [Formality and casualness](#formality-and-casualness)
 - seasons, the seasons the item is worn in (spring, summer, autumn, winter); taken from the type unless you choose them. See [Seasons](#seasons)
 - cost (yen)
 - image (optional)
@@ -77,7 +77,7 @@ formality score:
 
 | -2          | -1     | 0       | 1      | 2           |
 | ----------- | ------ | ------- | ------ | ----------- |
-| more casual | casual | neutral | formal | more formal |
+| very casual | casual | neutral | formal | very formal |
 
 In the app, each item has this score (set with a slider in the item form, shown in both views, sortable, and counted in the stats and the formality matrix). If you do not enter one, the score is calculated automatically as the type's score plus the color's score, kept within -2 to 2. For example, Slacks (+1) in Black (+1) gives +2, and a T-shirt (-2) in Black (+1) gives -1. Dark, quiet colors (Black, Navy) add +1 and loud ones (Yellow, Orange, Pink, Red) subtract 1; the scores per type and color are in `src/formality.ts`. When you add items by your AI, the AI may give a score too; if it does not, the automatic one is used.
 

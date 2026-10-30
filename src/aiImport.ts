@@ -40,7 +40,7 @@ Reply with ONLY a JSON array in a single code block, with no other text. Each el
 - "color": one of ${colors}
 - "size": size label such as "M" or "30" ("" if unknown)
 - "seasons": the seasons the item is meant to be worn in, an array of "spring", "summer", "autumn", "winter" (e.g. ["autumn","winter"]); null if unsure
-- "formality": integer from -2 (more casual), -1 (casual), 0 (neutral), 1 (formal) to 2 (more formal); null if unsure
+- "formality": integer from -2 (very casual), -1 (casual), 0 (neutral), 1 (formal) to 2 (very formal); null if unsure
 - "cost": price paid for one unit in yen, as an integer without symbols or commas
 - "url": product page URL ("" if unknown)
 
