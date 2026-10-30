@@ -1,6 +1,7 @@
 import { CLOTH_TYPES } from './clothTypes';
 import { COLORS } from './colors';
 import { JA_COLORS, JA_TYPES, type Lang, type Translate } from './i18n';
+import { toFormality } from './formality';
 import type { NewClothItem } from './types';
 
 const quoted = (list: string[]) => list.map((v) => `"${v}"`).join(', ');
@@ -20,6 +21,7 @@ export function buildPrompt(lang: Lang): string {
 - "type": 次のいずれか: ${types}
 - "color": 次のいずれか: ${colors}
 - "size": "M" や "30" などのサイズ表記（不明なら ""）
+- "formality": フォーマル度を -2（よりカジュアル）、-1（カジュアル）、0（ニュートラル）、1（フォーマル）、2（よりフォーマル）の整数で。分からなければ null
 - "cost": 1点あたりの支払額。円の整数で、記号やカンマは付けない
 - "url": 商品ページのURL（不明なら ""）
 
@@ -35,6 +37,7 @@ Reply with ONLY a JSON array in a single code block, with no other text. Each el
 - "type": one of ${types}
 - "color": one of ${colors}
 - "size": size label such as "M" or "30" ("" if unknown)
+- "formality": integer from -2 (more casual), -1 (casual), 0 (neutral), 1 (formal) to 2 (more formal); null if unsure
 - "cost": price paid for one unit in yen, as an integer without symbols or commas
 - "url": product page URL ("" if unknown)
 
@@ -109,6 +112,7 @@ export function parseAiReply(text: string, t: Translate): ParseResult {
       type,
       color,
       size: String(row.size ?? '').trim(),
+      formality: row.formality === null || row.formality === undefined || row.formality === '' || !Number.isFinite(Number(row.formality)) ? null : toFormality(row.formality),
       cost,
       image: '',
       url: /^https?:\/\//i.test(url) ? url : '',

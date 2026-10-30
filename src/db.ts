@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS items (
   type TEXT NOT NULL,
   color TEXT NOT NULL,
   size TEXT NOT NULL DEFAULT '',
+  formality INTEGER NOT NULL DEFAULT 0,
+  formality_manual INTEGER NOT NULL DEFAULT 0,
   cost INTEGER NOT NULL,
   image TEXT NOT NULL DEFAULT '',
   url TEXT NOT NULL DEFAULT ''
@@ -44,6 +46,12 @@ function prepare(d: Database): void {
   const cols = d.exec('PRAGMA table_info(items)')[0].values.map((r) => r[1]);
   for (const col of ['image', 'url', 'size']) {
     if (!cols.includes(col)) d.run(`ALTER TABLE items ADD COLUMN ${col} TEXT NOT NULL DEFAULT ''`);
+  }
+  if (!cols.includes('formality')) d.run('ALTER TABLE items ADD COLUMN formality INTEGER NOT NULL DEFAULT 0');
+  if (!cols.includes('formality_manual')) {
+    d.run('ALTER TABLE items ADD COLUMN formality_manual INTEGER NOT NULL DEFAULT 0');
+    // before this flag existed 0 was the default, so only non-zero scores are known to be entered by hand
+    d.run('UPDATE items SET formality_manual = 1 WHERE formality != 0');
   }
 }
 
@@ -99,7 +107,7 @@ function persist(): void {
 
 export function listItems(): ClothItem[] {
   const res = db.exec(
-    'SELECT id, name, purchased_date, brand, type, color, cost, image, url, size FROM items',
+    'SELECT id, name, purchased_date, brand, type, color, cost, image, url, size, formality, formality_manual FROM items',
   );
   if (res.length === 0) return [];
   return res[0].values.map((r) => ({
@@ -113,21 +121,22 @@ export function listItems(): ClothItem[] {
     image: r[7] as string,
     url: r[8] as string,
     size: r[9] as string,
+    formality: r[11] ? (r[10] as number) : null,
   }));
 }
 
 export function addItem(i: NewClothItem): void {
   db.run(
-    'INSERT INTO items (name, purchased_date, brand, type, color, cost, image, url, size) VALUES (?,?,?,?,?,?,?,?,?)',
-    [i.name, i.purchasedDate, i.brand, i.type, i.color, i.cost, i.image, i.url, i.size],
+    'INSERT INTO items (name, purchased_date, brand, type, color, cost, image, url, size, formality, formality_manual) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+    [i.name, i.purchasedDate, i.brand, i.type, i.color, i.cost, i.image, i.url, i.size, i.formality ?? 0, i.formality === null ? 0 : 1],
   );
   persist();
 }
 
 export function updateItem(i: ClothItem): void {
   db.run(
-    'UPDATE items SET name=?, purchased_date=?, brand=?, type=?, color=?, cost=?, image=?, url=?, size=? WHERE id=?',
-    [i.name, i.purchasedDate, i.brand, i.type, i.color, i.cost, i.image, i.url, i.size, i.id],
+    'UPDATE items SET name=?, purchased_date=?, brand=?, type=?, color=?, cost=?, image=?, url=?, size=?, formality=?, formality_manual=? WHERE id=?',
+    [i.name, i.purchasedDate, i.brand, i.type, i.color, i.cost, i.image, i.url, i.size, i.formality ?? 0, i.formality === null ? 0 : 1, i.id],
   );
   persist();
 }

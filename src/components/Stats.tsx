@@ -1,15 +1,17 @@
 import { Box, Card, CardContent, LinearProgress, Stack, Typography } from '@mui/material';
 import ColorByCategory from './ColorByCategory';
+import FormalityMatrix from './FormalityMatrix';
 import { categoryOf } from '../clothTypes';
 import { useI18n } from '../i18n';
+import { effectiveFormality, formalityKey, signed } from '../formality';
 import type { ClothItem } from '../types';
 
 const NONE = '';
 
-function groupBy(items: ClothItem[], key: 'brand' | 'type' | 'color' | 'category') {
+function groupBy(items: ClothItem[], key: 'brand' | 'type' | 'color' | 'category' | 'formality') {
   const m = new Map<string, { count: number; cost: number }>();
   for (const it of items) {
-    const k = (key === 'category' ? categoryOf(it.type) : it[key].trim()) || NONE;
+    const k = (key === 'category' ? categoryOf(it.type) : key === 'formality' ? String(effectiveFormality(it)) : it[key].trim()) || NONE;
     const g = m.get(k) ?? { count: 0, cost: 0 };
     g.count++;
     g.cost += it.cost;
@@ -59,11 +61,18 @@ export default function Stats({ items }: { items: ClothItem[] }) {
         </CardContent></Card>
       </Stack>
       <ColorByCategory items={items} />
+      <FormalityMatrix items={items} />
       <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: "wrap" }}>
         <Breakdown title={t('stats.byBrand')} rows={groupBy(items, 'brand')} total={items.length} show={orNone((k) => k)} />
         <Breakdown title={t('stats.byCategory')} rows={groupBy(items, 'category')} total={items.length} show={orNone(categoryLabel)} />
         <Breakdown title={t('stats.byType')} rows={groupBy(items, 'type')} total={items.length} show={orNone(typeLabel)} />
         <Breakdown title={t('stats.byColor')} rows={groupBy(items, 'color')} total={items.length} show={orNone(colorLabel)} />
+        <Breakdown
+          title={t('stats.byFormality')}
+          rows={groupBy(items, 'formality').sort((a, b) => Number(a[0]) - Number(b[0]))}
+          total={items.length}
+          show={(k) => `${signed(Number(k))} ${t(formalityKey(Number(k)))}`}
+        />
       </Stack>
     </Stack>
   );

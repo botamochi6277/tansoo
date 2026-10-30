@@ -19,6 +19,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { buildPrompt, parseAiReply, type ParseResult } from '../aiImport';
 import { useI18n } from '../i18n';
+import { effectiveFormality, signed } from '../formality';
 import type { NewClothItem } from '../types';
 
 interface Props {
@@ -119,6 +120,7 @@ export default function AiImportDialog({ open, onClose, onAdd }: Props) {
                     <TableCell>{t('col.type')}</TableCell>
                     <TableCell>{t('col.color')}</TableCell>
                     <TableCell>{t('col.size')}</TableCell>
+                    <TableCell>{t('col.formality')}</TableCell>
                     <TableCell align="right">{t('col.cost')}</TableCell>
                   </TableRow>
                 </TableHead>
@@ -131,6 +133,7 @@ export default function AiImportDialog({ open, onClose, onAdd }: Props) {
                       <TableCell>{typeLabel(it.type)}</TableCell>
                       <TableCell>{colorLabel(it.color)}</TableCell>
                       <TableCell>{it.size}</TableCell>
+                      <TableCell>{signed(effectiveFormality(it))}</TableCell>
                       <TableCell align="right">{it.cost.toLocaleString()}</TableCell>
                     </TableRow>
                   ))}

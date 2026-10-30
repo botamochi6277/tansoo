@@ -11,7 +11,7 @@ A user can
 1. register, edit, and delete cloth items, or add many at once from an order history page with [your AI](#add-by-your-ai)
 1. browse the items as compact cards (default) or as a table, sorted by any column
 1. filter the items by free-text search, category, color, and brand
-1. analyze stats (item count, total/average cost, a stacked bar chart of colors by category, and breakdowns by brand, category, type, and color)
+1. analyze stats (item count, total/average cost, a stacked bar chart of colors by category, a matrix of formality by category, and breakdowns by brand, category, type, color, and formality)
 1. switch between light and dark mode (follows the system setting by default)
 1. switch the display language between English and Japanese (follows the browser language by default; type, category, and color names are translated for display only, the stored data stays language independent)
 1. keep the data in a `.sqlite` file, or export/import it
@@ -21,10 +21,22 @@ A user can
 - name
 - purchased date
 - brand (e.g. Uniqlo, GU, muji)
-- type (e.g. T-shirt, long pants, coat), chosen with radio buttons
-- category (Outerwear, Tops, Bottoms, Innerwear, Accessories, Other); derived from the type, not stored
+- type (e.g. T-shirt, slacks, coat), chosen with radio buttons
+- category, derived from the type and not stored:
+
+  | Category    | Types                                                                  |
+  | ----------- | ---------------------------------------------------------------------- |
+  | Outerwear   | Jacket, Coat, Hoodie                                                   |
+  | Tops        | T-shirt, Long T-shirt, Polo shirt, Shirt, Sweatshirt, Knit             |
+  | Bottoms     | Short pants, Long pants, Jeans, Slacks, Sweatpants, Skirt              |
+  | Innerwear   | Underwear, Socks, Loungewear                                           |
+  | Accessories | Hat, Scarf, Gloves, Eyewear, Bag, Shoes                                |
+  | Sets        | Suit, One-piece                                                        |
+  | Other       | Other                                                                  |
+
 - color, chosen from a fixed palette
 - size (optional, e.g. M, 30, 26.5)
+- formality, a score from -2 (more casual) to 2 (more formal); calculated from the type and color unless you enter it. See [Formality and casualness](#formality-and-casualness)
 - cost (yen)
 - image (optional)
 - url (optional, e.g. a product page)
@@ -52,6 +64,22 @@ Registering many items by hand is tedious, so Tansoo can use an AI model of your
 
 The prompt is written in the current display language and asks for English type and color names; the pasted reply may use either the English or the Japanese names. Photos are not imported. It has been tried with Gemini on the UNIQLO and GU order pages.
 
+## Formality and casualness
+
+In our everyday lives, we wear both formal and casual clothing. It’s often said that a stylish outfit is one that strikes the right balance between formality and casualness.
+
+For example, if you’re wearing casual blue jeans, pairing them with a jacket and leather shoes can easily make your outfit look stylish.
+
+This app organizes items by assigning them a score based on their level of formality or casualness.
+
+formality score:
+
+| -2          | -1     | 0       | 1      | 2           |
+| ----------- | ------ | ------- | ------ | ----------- |
+| more casual | casual | neutral | formal | more formal |
+
+In the app, each item has this score (set with a slider in the item form, shown in both views, sortable, and counted in the stats and the formality matrix). If you do not enter one, the score is calculated automatically as the type's score plus the color's score, kept within -2 to 2. For example, Slacks (+1) in Black (+1) gives +2, and a T-shirt (-2) in Black (+1) gives -1. Dark, quiet colors (Black, Navy) add +1 and loud ones (Yellow, Orange, Pink, Red) subtract 1; the scores per type and color are in `src/formality.ts`. When you add items by your AI, the AI may give a score too; if it does not, the automatic one is used.
+
 ## Where the data is stored
 
 The data is a SQLite database that lives in your browser.
@@ -60,7 +88,7 @@ The data is a SQLite database that lives in your browser.
 - **File on disk (Chrome / Edge)**: use _New file_ or _Open file_ to link a `.sqlite` file through the File System Access API. While linked, every change is also written to that file, and the app offers to reconnect to it on the next visit. The linked file is the source of truth when it is loaded.
 - **Export / Import (other browsers)**: where the File System Access API is not available, _Export_ downloads the database as `tansoo-YYYY-MM-DD.sqlite` and _Import_ replaces the current data with a chosen file.
 
-Export a file now and then as a backup.
+Databases saved by an older version of Tansoo are upgraded when they are loaded or imported, so they keep working. Export a file now and then as a backup.
 
 ## Deployment
 
